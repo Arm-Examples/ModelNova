@@ -1,0 +1,130 @@
+layer:
+  type: Board
+  description: AppKit-E8-AIML board setup using M55_HP and Ethos-U55
+  for-board: Alif Semiconductor::AppKit-E8-AIML
+  for-device: Alif Semiconductor::AE822FA0E5597BS0:M55_HP
+  device: :M55_HP
+
+  # Processor features used in this project.
+  processor:
+    trustzone: off
+
+  # List connections used to identify compatible software layers.
+  connections:
+    - connect: AppKit-E8-AIML Board
+      provides:
+        - CMSIS_ETH
+        - CMSIS_USART
+        - CMSIS_USB_Device
+        - CMSIS_VIO
+        - CMSIS_VSTREAM_VIDEO_IN
+        - CMSIS_VSTREAM_VIDEO_OUT
+        - STDIN
+        - STDOUT
+        - STDERR
+        - Heap: 98304
+      consumes:
+        - CMSIS-RTOS2
+
+  # List of #define statements passed via the command line to the build tool.
+  define:
+    - CMSIS_target_header: \"AppKit-E8-AIML.h\"
+    - ETHOSU55
+    - NPU_QCONFIG: 1
+    - NPU_REGIONCFG_0: 1
+    - NPU_REGIONCFG_1: 0
+    - NPU_REGIONCFG_2: 1
+    - AXI_LIMIT0_MEM_TYPE: 3
+    - AXI_LIMIT1_MEM_TYPE: 3
+    - AXI_LIMIT2_MEM_TYPE: 3
+    - AXI_LIMIT3_MEM_TYPE: 3
+
+  # List the packs used in the layer.
+  packs:
+    - pack: AlifSemiconductor::Ensemble@^2.1.0
+    - pack: ARM::CMSIS@^6.2.0
+    - pack: ARM::CMSIS-Compiler@^2.1.0
+    - pack: ARM::CMSIS-Driver@^2.10.0
+    - pack: ARM::ethos-u-core-driver@^1.25.2
+
+  # List miscellaneous options passed via the command line to the build tool.
+  misc:
+    - for-compiler: AC6
+      Link:
+        - '--diag_suppress 6312,6314,6329,6848'
+
+  # List components to use for your application.
+  # A software component is a re-usable unit that may be configurable.
+  components:
+    - component: Device:Startup
+
+    - component: BSP:Board Config
+    - component: BSP:AppKit Config&AppKit-E8-AIML
+    - component: BSP:External peripherals:CAMERA Sensor MT9M114
+    - component: BSP:External peripherals:Ethernet PHY
+    - component: BSP:External peripherals:ILI9806E LCD panel
+
+    - component: CMSIS:CORE
+
+    - component: CMSIS Driver:Ethernet MAC
+    - component: CMSIS Driver:Ethernet PHY:Custom
+    - component: CMSIS Driver:GPIO
+      define:
+        - CMSIS_GPIO_DISABLE_EVENTS
+    - component: CMSIS Driver:I2C
+    - component: CMSIS Driver:SPI
+    - component: CMSIS Driver:USART
+    - component: CMSIS Driver:USB Device
+    - component: CMSIS Driver:VIO:Custom
+#   - component: CMSIS Driver:VIO:Board&AppKit-E8-AIML
+    - component: CMSIS Driver:vStream:Custom
+#   - component: CMSIS Driver:vStream:VideoIn&AppKit-E8-AIML
+#   - component: CMSIS Driver:vStream:VideoOut&AppKit-E8-AIML
+
+    - component: CMSIS-Compiler:CORE
+    - component: CMSIS-Compiler:STDERR:Custom
+    - component: CMSIS-Compiler:STDIN:Custom
+    - component: CMSIS-Compiler:STDOUT:Custom
+
+    - component: Device:SOC Peripherals:CDC
+    - component: Device:SOC Peripherals:CPI
+    - component: Device:SOC Peripherals:DMA
+    - component: Device:SOC Peripherals:GPIO
+    - component: Device:SOC Peripherals:MHU
+    - component: Device:SOC Peripherals:MIPI CSI2
+    - component: Device:SOC Peripherals:MIPI DSI
+    - component: Device:SOC Peripherals:MIPI DSI CSI2 DPHY
+    - component: Device:SOC Peripherals:PINCONF
+
+    - component: Machine Learning:NPU Support:Ethos-U Driver&Generic U55
+
+    - component: Services:Retarget IO:STDERR
+    - component: Services:Retarget IO:STDIN
+    - component: Services:Retarget IO:STDOUT
+    - component: Services:Secure Enclave:core&Source
+    - component: Services:Secure Enclave:Initialization Helper&Source
+
+  # List of source groups and files added to a project or a layer.
+  groups:
+    - group: Board
+      files:
+        - file: ./main.c
+        - file: ./main.h
+        - file: ./AppKit-E8-AIML.h
+        - file: ./ethos_setup.c
+        - file: ./retarget_stdio.c
+        - file: ./ext_init.c
+        - file: ./profiler.c
+        - file: ./profiler.h
+        - file: ./cxx_stubs.cpp
+
+    - group: Ethos Interface
+      files:
+        - file: ./ethosu_cb_dcache.c
+        - file: ./ethosu_cb_os_rtos2.c
+
+    - group: Drivers
+      files:
+        - file: vio_AppKit-E8-AIML.c
+        - file: vstream_video_in.c
+        - file: vstream_video_out.c
