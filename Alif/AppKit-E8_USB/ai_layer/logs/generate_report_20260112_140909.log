@@ -1,5 +1,0 @@
-/workspace2/scripts/generate_ai_layer_report.py:289: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  timestamp = datetime.utcnow().isoformat(timespec='seconds') + 'Z'
-Generating comprehensive AI layer build report...
-✅ Comprehensive report written to /workspace2/ai_layer_20260112_140909/REPORT.md
-📊 Found 9 libraries and 1 model assets
