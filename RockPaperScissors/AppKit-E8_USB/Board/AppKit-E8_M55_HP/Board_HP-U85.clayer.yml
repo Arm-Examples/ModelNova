@@ -90,9 +90,9 @@ layer:
 
     - component: Machine Learning:NPU Support:Ethos-U Driver&Generic U85
 
-    - component: Services:Retarget IO:STDERR
-    - component: Services:Retarget IO:STDIN
-    - component: Services:Retarget IO:STDOUT
+#   - component: Services:Retarget IO:STDERR
+#   - component: Services:Retarget IO:STDIN
+#   - component: Services:Retarget IO:STDOUT
     - component: Services:Secure Enclave:core&Source
     - component: Services:Secure Enclave:Initialization Helper&Source
 
@@ -104,7 +104,8 @@ layer:
         - file: ./main.h
         - file: ./AppKit-E8-AIML.h
         - file: ./ethos_setup.c
-        - file: ./retarget_stdio.c
+#       - file: ./retarget_stdio.c
+        - file: ../../RTT/Retarget/stdio_rtt.c
         - file: ./ext_init.c
         - file: ./profiler.c
         - file: ./profiler.h

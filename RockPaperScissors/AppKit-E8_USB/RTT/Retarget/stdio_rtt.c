@@ -40,7 +40,7 @@ extern int stdin_getchar  (void);
 */
 int stdio_init (void) {
 
-//SEGGER_RTT_Init();  // Not explicitly required, as RTT is initialized implicitly on first use
+  SEGGER_RTT_Init();  // Not explicitly required, as RTT is initialized implicitly on first use
 
   return 0;
 }

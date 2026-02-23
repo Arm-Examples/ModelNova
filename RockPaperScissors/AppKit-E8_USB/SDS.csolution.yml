@@ -38,8 +38,13 @@ solution:
             rtt:
               - pname: M55_HP
                 channel:
+                  - number: 0
+                    mode: stdio
                   - number: 1
                     mode: systemview
+            telnet:
+              - pname: M55_HP
+                mode: console
           images:
             - project-context: AlgorithmTest.DebugRec
 
