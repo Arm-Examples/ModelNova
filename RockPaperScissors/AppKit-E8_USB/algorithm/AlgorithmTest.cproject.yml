@@ -39,13 +39,13 @@ project:
         - file: sds_main.c
         - file: sds_algorithm_user.cpp
         - file: sds_algorithm_config.h
-        - file: sds_data_in_user.c
         - file: arm_memory_allocator.h
         - file: arm_memory_allocator.cc
         - file: arm_executor_runner.cc
         - file: arm_executor_runner.h
         - file: image_processing_func.c
         - file: image_processing_func.h
+        - file: sds_data_in_user.c
           for-context:
             - .DebugRec
             - .ReleaseRec
