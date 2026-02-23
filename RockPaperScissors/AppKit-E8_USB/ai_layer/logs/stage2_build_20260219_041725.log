@@ -1,0 +1,164 @@
+[Stage2] Using model analysis from: /workspace2/model/ethos_u_minimal_example.pte
+[Stage2] Configuring selective portable ops build...
+[Stage2] Strategy: Model analysis
+-- ExecuTorch ARM toolchain not found, using system PATH
+-- ccache not found, builds will not be cached
+-- Using the multi-header code from /workspace/executorch/third-party/json/include/
+CMake Deprecation Warning at third-party/gflags/CMakeLists.txt:73 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+CMake Deprecation Warning at third-party/flatcc/CMakeLists.txt:2 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+-- dist install dir /workspace/executorch/third-party/flatcc
+-- lib install dir /workspace/executorch/third-party/flatcc/lib
+-- Setting GNU C compiler options with c11 and Posix
+-- Disabling -pedantic for GCC >= 8.0
+-- Disabling GNU C compiler warnings: -Wstringop-truncation -Wno-format-overflow
+-- GCC_VERSION: 13.3.1
+
+-- Configured C_FLAGS:  -DFLATCC_REFLECTION=0 -std=c11 -Wall -Wextra -Wno-stringop-truncation -Wno-format-overflow -Wno-misleading-indentation -DPORTABLE_POSIX_MEMALIGN=1 -Werror -Wno-unused-function -Wsign-conversion
+CMake Deprecation Warning at backends/xnnpack/third-party/FXdiv/CMakeLists.txt:1 (CMAKE_MINIMUM_REQUIRED):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+-- Generating selected operator lib:
+--   LIB_NAME: portable_ops_lib
+--   OPS_SCHEMA_YAML: /workspace/executorch/kernels/portable/functions.yaml
+--   ROOT_OPS: 
+--   INCLUDE_ALL_OPS: 
+--   OPS_FROM_MODEL: 
+--   DTYPE_SELECTIVE_BUILD: 
+Command - python3;-m;codegen.tools.gen_oplist;--output_path=/workspace2/out/stage2/kernels/portable/portable_ops_lib/selected_operators.yaml;--ops_schema_yaml_path="/workspace/executorch/kernels/portable/functions.yaml"
+-- Generating kernel bindings:
+--   LIB_NAME: portable_ops_lib
+--   FUNCTIONS_YAML: /workspace/executorch/kernels/portable/functions.yaml
+--   CUSTOM_OPS_YAML: 
+--   ADD_EXCEPTION_BOUNDARY: FALSE
+--   DTYPE_SELECTIVE_BUILD: 
+Generated files /workspace2/out/stage2/kernels/portable/portable_ops_lib/RegisterCodegenUnboxedKernelsEverything.cpp;/workspace2/out/stage2/kernels/portable/portable_ops_lib/Functions.h;/workspace2/out/stage2/kernels/portable/portable_ops_lib/NativeFunctions.h
+-- Generating operator lib:
+--   LIB_NAME: portable_ops_lib
+--   KERNEL_LIBS: portable_kernels
+--   DEPS: executorch_core
+--   DTYPE_SELECTIVE_BUILD: 
+-- Generating selected operator lib:
+--   LIB_NAME: executorch_selected_kernels
+--   OPS_SCHEMA_YAML: 
+--   ROOT_OPS: aten::add.out,aten::mul.out,aten::relu.out,aten::view_copy.out,aten::permute_copy.out,aten::conv2d.out,aten::linear.out,aten::sigmoid.out,aten::softmax.out
+--   INCLUDE_ALL_OPS: FALSE
+--   OPS_FROM_MODEL: /workspace2/model/ethos_u_minimal_example.pte
+--   DTYPE_SELECTIVE_BUILD: OFF
+Command - python3;-m;codegen.tools.gen_oplist;--output_path=/workspace2/out/stage2/executorch_selected_kernels/selected_operators.yaml;--root_ops="aten::add.out,aten::mul.out,aten::relu.out,aten::view_copy.out,aten::permute_copy.out,aten::conv2d.out,aten::linear.out,aten::sigmoid.out,aten::softmax.out";--model_file_path="/workspace2/model/ethos_u_minimal_example.pte"
+-- Generating kernel bindings:
+--   LIB_NAME: executorch_selected_kernels
+--   FUNCTIONS_YAML: /workspace/executorch/kernels/portable/functions.yaml
+--   CUSTOM_OPS_YAML: 
+--   ADD_EXCEPTION_BOUNDARY: FALSE
+--   DTYPE_SELECTIVE_BUILD: OFF
+-- Generating operator lib:
+--   LIB_NAME: executorch_selected_kernels
+--   KERNEL_LIBS: portable_kernels
+--   DEPS: executorch_core
+--   DTYPE_SELECTIVE_BUILD: OFF
+-- --- Configured Options ---
+
+-- BUILD_TESTING                             : OFF
+-- CCACHE_PROGRAM                            : CCACHE_PROGRAM-NOTFOUND
+-- CMAKE_BUILD_TYPE                          : Release
+-- CMAKE_CXX_COMPILER_ID                     : GNU
+-- CMAKE_CXX_STANDARD                        : 17
+-- CMAKE_SYSTEM_PROCESSOR                    : cortex-m55
+-- CMAKE_TOOLCHAIN_FILE                      : /workspace2/model/arm-none-eabi-gcc.cmake
+-- EXECUTORCH_BUILD_ARM_BAREMETAL            : ON
+-- EXECUTORCH_BUILD_CADENCE                  : OFF
+-- EXECUTORCH_BUILD_COREML                   : OFF
+-- EXECUTORCH_BUILD_CORTEX_M                 : OFF
+-- EXECUTORCH_BUILD_CPUINFO                  : OFF
+-- EXECUTORCH_BUILD_DEVTOOLS                 : OFF
+-- EXECUTORCH_BUILD_EXECUTOR_RUNNER          : OFF
+-- EXECUTORCH_BUILD_EXTENSION_APPLE          : OFF
+-- EXECUTORCH_BUILD_EXTENSION_DATA_LOADER    : OFF
+-- EXECUTORCH_BUILD_EXTENSION_EVALUE_UTIL    : OFF
+-- EXECUTORCH_BUILD_EXTENSION_FLAT_TENSOR    : OFF
+-- EXECUTORCH_BUILD_EXTENSION_LLM            : OFF
+-- EXECUTORCH_BUILD_EXTENSION_LLM_APPLE      : OFF
+-- EXECUTORCH_BUILD_EXTENSION_LLM_RUNNER     : OFF
+-- EXECUTORCH_BUILD_EXTENSION_MODULE         : OFF
+-- EXECUTORCH_BUILD_EXTENSION_NAMED_DATA_MAP : OFF
+-- EXECUTORCH_BUILD_EXTENSION_RUNNER_UTIL    : OFF
+-- EXECUTORCH_BUILD_EXTENSION_TENSOR         : OFF
+-- EXECUTORCH_BUILD_EXTENSION_TRAINING       : OFF
+-- EXECUTORCH_BUILD_KERNELS_LLM              : OFF
+-- EXECUTORCH_BUILD_KERNELS_LLM_AOT          : OFF
+-- EXECUTORCH_BUILD_KERNELS_OPTIMIZED        : OFF
+-- EXECUTORCH_BUILD_KERNELS_QUANTIZED        : OFF
+-- EXECUTORCH_BUILD_KERNELS_QUANTIZED_AOT    : OFF
+-- EXECUTORCH_BUILD_MPS                      : OFF
+-- EXECUTORCH_BUILD_NEURON                   : OFF
+-- EXECUTORCH_BUILD_OPENVINO                 : OFF
+-- EXECUTORCH_BUILD_PORTABLE_OPS             : ON
+-- EXECUTORCH_BUILD_PTHREADPOOL              : OFF
+-- EXECUTORCH_BUILD_PYBIND                   : OFF
+-- EXECUTORCH_BUILD_QNN                      : OFF
+-- EXECUTORCH_BUILD_SIZE_TEST                : OFF
+-- EXECUTORCH_BUILD_TESTS                    : OFF
+-- EXECUTORCH_BUILD_TOKENIZERS_WASM          : OFF
+-- EXECUTORCH_BUILD_VGF                      : OFF
+-- EXECUTORCH_BUILD_VULKAN                   : OFF
+-- EXECUTORCH_BUILD_WASM                     : OFF
+-- EXECUTORCH_BUILD_XNNPACK                  : OFF
+-- EXECUTORCH_CADENCE_CPU_RUNNER             : OFF
+-- EXECUTORCH_COREML_BUILD_EXECUTOR_RUNNER   : OFF
+-- EXECUTORCH_ENABLE_DTYPE_SELECTIVE_BUILD   : OFF
+-- EXECUTORCH_ENABLE_EVENT_TRACER            : OFF
+-- EXECUTORCH_ENABLE_LOGGING                 : ON
+-- EXECUTORCH_ENABLE_PROGRAM_VERIFICATION    : OFF
+-- EXECUTORCH_FLATBUFFERS_MAX_ALIGNMENT      : 1024
+-- EXECUTORCH_LOG_LEVEL                      : Info
+-- EXECUTORCH_NNLIB_OPT                      : OFF
+-- EXECUTORCH_OPTIMIZE_SIZE                  : ON
+-- EXECUTORCH_PAL_DEFAULT                    : posix
+-- EXECUTORCH_PAL_DEFAULT_FILE_PATH          : /workspace/executorch/runtime/platform/default/posix.cpp
+-- EXECUTORCH_SELECT_OPS_LIST                : aten::add.out,aten::mul.out,aten::relu.out,aten::view_copy.out,aten::permute_copy.out,aten::conv2d.out,aten::linear.out,aten::sigmoid.out,aten::softmax.out
+-- EXECUTORCH_SELECT_OPS_MODEL               : /workspace2/model/ethos_u_minimal_example.pte
+-- EXECUTORCH_SELECT_OPS_YAML                : 
+-- EXECUTORCH_USE_CPP_CODE_COVERAGE          : OFF
+-- EXECUTORCH_USE_DL                         : ON
+-- EXECUTORCH_XNNPACK_ENABLE_KLEIDI          : ON
+-- EXECUTORCH_XNNPACK_ENABLE_WEIGHT_CACHE    : OFF
+-- EXECUTORCH_XNNPACK_SHARED_WORKSPACE       : ON
+-- PYTHON_EXECUTABLE                         : python3
+-- --------------------------
+-- Configuring done (1.8s)
+-- Generating done (0.1s)
+-- Build files have been written to: /workspace2/out/stage2
+[Stage2] Building selective operator library...
+[  3%] Built target flatbuffers_ep
+[  3%] Built target common_schema
+[  4%] Built target program_schema
+[ 13%] Built target executorch_core
+[ 21%] Built target kernels_util_all_deps
+[ 98%] Built target portable_kernels
+[ 98%] Generating code for kernel registration
+[ 98%] Generating code for kernel registration
+[100%] Built target portable_ops_lib
+[Stage2] Copying artifacts...
+cp: './assets/lib/libportable_ops_lib.a' and '/workspace2/out/stage2/assets/lib/libportable_ops_lib.a' are the same file
