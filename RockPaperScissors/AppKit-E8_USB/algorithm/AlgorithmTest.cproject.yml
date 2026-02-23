@@ -53,6 +53,19 @@ project:
           for-context:
             - .DebugPlay
             - .ReleasePlay
+    - group: RTT
+      files:
+        - file: ../RTT/Config/SEGGER_RTT_Conf.h
+        - file: ../RTT/RTT/SEGGER_RTT_ASM_ARMv7M.S
+        - file: ../RTT/RTT/SEGGER_RTT.h
+        - file: ../RTT/RTT/SEGGER_RTT.c
+    - group: SystemView
+      files:
+        - file: ../SystemView/Config/SEGGER_SYSVIEW_Conf.h
+        - file: ../SystemView/SEGGER/SEGGER.h
+        - file: ../SystemView/SYSVIEW/SEGGER_SYSVIEW.h
+        - file: ../SystemView/SYSVIEW/SEGGER_SYSVIEW.c
+        - file: ../SystemView/SYSVIEW/SEGGER_SYSVIEW_Config_NoOS.c
 
   components:
     - component: CMSIS:OS Tick:SysTick
