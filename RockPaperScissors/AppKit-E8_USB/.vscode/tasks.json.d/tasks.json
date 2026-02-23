@@ -105,6 +105,31 @@
                 }
             },
             "problemMatcher": []
+        },
+        {
+            "label": "pyOCD Run",
+            "type": "shell",
+            "command": "pyocd",
+            "options": {
+                "cwd": "${workspaceFolder}/",
+                "shell": {
+                    "executable": "cmd.exe",
+                    "args": [
+                        "/d",
+                        "/c"
+                    ]
+                }
+            },
+            "problemMatcher": [],
+            "args": [
+                "run",
+                "--probe",
+                "cmsisdap:",
+                "-O",
+                "reset_type=hardware",
+                "--cbuild-run",
+                "${command:cmsis-csolution.getCbuildRunFile}"
+            ]
         }
     ]
 }
