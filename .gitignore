@@ -52,7 +52,7 @@ Mkfile.old
 dkms.conf
 
 # Clangd
-.clangd
+**/.clangd
 
 # uv2csolution generated log file
 uv2csolution.log

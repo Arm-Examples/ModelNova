@@ -2,32 +2,32 @@
 
 ![ModelNova Fusion Studio](./Documentation/ModelNova.png "ModelNova Fusion Studio")
 
-This repository explains how **Edge AI applications with Cortex-M/Ethos-U based microcontrollers** are created. It uses [ModelNova](https://modelnova.ai/) for the AI model development and [Keil MDK](https://www.keil.arm.com/) for the embedded development.
+This repository shows how to build **Edge AI applications with Cortex-M/Ethos-U based microcontrollers**. It uses [ModelNova](https://modelnova.ai/) for the AI model development and [Keil MDK](https://www.keil.arm.com/) for the embedded development.
 
 ## Learn more at Embedded World 2026
 
 ### Arm: Hall 4-504
 
-Application Development, Data Capturing, and Workload Analysis of an Edge AI system based on [Alif E8](https://www.keil.arm.com/packs/ensemble-alifsemiconductor).
+Application development, data capturing, and workload analysis of an Edge AI system based on [Alif E8](https://www.keil.arm.com/packs/ensemble-alifsemiconductor).
 
 ### ModelNova: Hall 4-600
 
-AI Model Selection, Data Labelling, and Model Creation for an Edge AI system based on [Alif E8](https://www.keil.arm.com/packs/ensemble-alifsemiconductor).
+AI model selection, data labeling, and model creation for an Edge AI system based on [Alif E8](https://www.keil.arm.com/packs/ensemble-alifsemiconductor).
 
 ### Exhibitor forum: Hall 5-210 on Wed, 03/11/2026, 09:30 - 10:00
 
-[From model to market: accelerated AI development on Arm](https://www.embedded-world.de/en/conferences-programme/2026/exhibitor-forum/from-model-to-market-accelerated-ai-development): don't miss this talk as it explains the overall AI model development workflow.
+[From model to market: accelerated AI development on Arm](https://www.embedded-world.de/en/conferences-programme/2026/exhibitor-forum/from-model-to-market-accelerated-ai-development). This talk explains the overall AI model development workflow.
 
 ## AI model development
 
-The diagram below shows the overall development of an AI model that is integrated into an embedded system. During AI model development the [SDS framework](https://www.keil.arm.com/packs/sds-arm/overview/) is used as a workbench for data capturing and system analysis. Once the optimized model delivers the expected performance it can be integrated into the final application that may be based on FreeRTOS, Keil RTX, or Zephyr.
+The diagram below shows the overall development of an AI model that is integrated into an embedded system. During AI model development, the [SDS framework](https://www.keil.arm.com/packs/sds-arm/overview/) is used as a workbench for data capturing and system analysis. Once the optimized model delivers the expected performance it can be integrated into the final application that may be based on FreeRTOS, Keil RTX, or Zephyr.
 
 ![AI model development workflow](https://github.com/ARM-software/SDS-Framework/blob/main/overview/MLOps.png "AI model development workflow")
 
 ### Initial development steps
 
-1. [Create the input interface](./Documentation/Input_Interface.md)  with signal conditioning and start capturing data for AI model training.
-2. [Select an AI model](.), used the captured data for training, analysis, and creation of the optimized AI model.
+1. [Create the input interface](./Documentation/Input_Interface.md) with signal conditioning and start capturing data for AI model training.
+2. [Select an AI model](./Documentation/), use the captured data for training, analysis, and creation of the optimized AI model.
 3. [Integrate the AI model](./Documentation/Integrate_AI_model.md) into the SDS framework and analyze performance.
 
 ### Refine AI model development
@@ -37,6 +37,8 @@ The diagram below shows the overall development of an AI model that is integrate
 3. [Add regression testing](./Documentation/Regression_Test.md) before integrating a new AI model into the embedded system.
 
 ## Quick Start
+
+The [RockPaperScissors](./RockPaperScissors) project implements an AI model that detects [three hand gestures](https://en.wikipedia.org/wiki/Rock_paper_scissors) ([RPS_cls_dataset](./RockPaperScissors/RPS_cls_dataset/) provides test data). The [`AppKit-E8_USB/SDS.csolution.yml`](./RockPaperScissors/AppKit-E8_USB/SDS.csolution.yml) project uses the SDS framework for testing the AI model on the Alif AppKit-E8 hardware or Arm FVP simulation model.
 
 ### Keil MDK
 
