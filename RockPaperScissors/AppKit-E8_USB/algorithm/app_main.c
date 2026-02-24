@@ -18,6 +18,9 @@
 
 #include "cmsis_os2.h"
 #include "sds_control.h"
+#ifdef USE_SEGGER_SYSVIEW
+#include "SEGGER_SYSVIEW.h"
+#endif
 
 
 // sdsControlThread thread attributes
@@ -30,6 +33,9 @@ osThreadAttr_t attr_sdsControlThread = {
  * Application main function
  *----------------------------------------------------------------------------*/
 int32_t app_main (void) {
+#ifdef USE_SEGGER_SYSVIEW
+  SEGGER_SYSVIEW_Conf();
+#endif
   osKernelInitialize();
   osThreadNew(sdsControlThread, NULL, &attr_sdsControlThread);
   osKernelStart();

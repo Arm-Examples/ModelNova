@@ -23,6 +23,10 @@
 #include CMSIS_device_header
 #include "arm_memory_allocator.h"
 #include "profiler.h"
+#ifdef USE_SEGGER_SYSVIEW
+#include "SEGGER_SYSVIEW.h"
+#include "sysview_markers.h"
+#endif
 #include "arm_executor_runner.h"  /* runner_output_label_t, RunnerContext (shared with sds_algorithm_user.cpp) */
 
 // AC6 (armclang) doesn't have unistd.h in bare-metal mode
@@ -1010,6 +1014,9 @@ bool run_inference(RunnerContext& ctx) {
             break;
         }
 
+#ifdef USE_SEGGER_SYSVIEW
+    SEGGER_SYSVIEW_MarkStart(SYSVIEW_MARKER_INFERENCE);
+#endif
 #if ENABLE_TIME_PROFILING
         inference_time = profiler_start();
 #endif
@@ -1021,6 +1028,9 @@ bool run_inference(RunnerContext& ctx) {
         ctx.temp_allocator.reset(temp_allocation_pool_size,
                                  temp_allocation_pool);
 
+#ifdef USE_SEGGER_SYSVIEW
+    SEGGER_SYSVIEW_MarkStop(SYSVIEW_MARKER_INFERENCE);
+#endif
 #if ENABLE_TIME_PROFILING
         inference_time = profiler_stop(inference_time);
         printf("Inference time: %3.3f ms.\n",

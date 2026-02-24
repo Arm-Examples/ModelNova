@@ -32,6 +32,10 @@
 #include "image_processing_func.h"
 #include "model_pte.h"
 #include "profiler.h"
+#ifdef USE_SEGGER_SYSVIEW
+#include "SEGGER_SYSVIEW.h"
+#include "sysview_markers.h"
+#endif
 
 #include <executorch/extension/data_loader/buffer_data_loader.h>
 #include <executorch/runtime/executor/program.h>
@@ -143,12 +147,18 @@ int32_t ExecuteAlgorithm(uint8_t *in_buf, uint32_t in_num,
     memset(out_buf, 0, out_num);
 
     /* ---- Pre-processing: HWC→CHW + ImageNet normalisation ---- */
+#ifdef USE_SEGGER_SYSVIEW
+    SEGGER_SYSVIEW_MarkStart(SYSVIEW_MARKER_PRE_PROCESS);
+#endif
 #if ENABLE_TIME_PROFILING
     uint32_t pre_process_time = profiler_start();
 #endif
 
     preprocess(in_buf);
 
+#ifdef USE_SEGGER_SYSVIEW
+    SEGGER_SYSVIEW_MarkStop(SYSVIEW_MARKER_PRE_PROCESS);
+#endif
 #if ENABLE_TIME_PROFILING
     pre_process_time = profiler_stop(pre_process_time);
     printf("Pre Processing time: %3.3f ms.\n",
@@ -162,12 +172,18 @@ int32_t ExecuteAlgorithm(uint8_t *in_buf, uint32_t in_num,
     }
 
     /* ---- Post-processing: decode output tensor into output_label ---- */
+#ifdef USE_SEGGER_SYSVIEW
+    SEGGER_SYSVIEW_MarkStart(SYSVIEW_MARKER_POST_PROCESS);
+#endif
 #if ENABLE_TIME_PROFILING
     uint32_t post_process_time = profiler_start();
 #endif
 
     postprocess(*ctx, in_buf, out_buf, out_num);
 
+#ifdef USE_SEGGER_SYSVIEW
+    SEGGER_SYSVIEW_MarkStop(SYSVIEW_MARKER_POST_PROCESS);
+#endif
 #if ENABLE_TIME_PROFILING
     post_process_time = profiler_stop(post_process_time);
     printf("Post Process time: %3.3f ms.\n",
@@ -175,6 +191,9 @@ int32_t ExecuteAlgorithm(uint8_t *in_buf, uint32_t in_num,
 #endif
 
     /* ---- Display: copy ML frame to LCD framebuffer ---- */
+#ifdef USE_SEGGER_SYSVIEW
+    SEGGER_SYSVIEW_MarkStart(SYSVIEW_MARKER_DISPLAY);
+#endif
 #if ENABLE_TIME_PROFILING
     uint32_t display_time = profiler_start();
 #endif
@@ -202,6 +221,9 @@ int32_t ExecuteAlgorithm(uint8_t *in_buf, uint32_t in_num,
         DISPLAY_FLIP_VERTICAL,
         DISPLAY_SWAP_RB);
 
+#ifdef USE_SEGGER_SYSVIEW
+    SEGGER_SYSVIEW_MarkStop(SYSVIEW_MARKER_DISPLAY);
+#endif
 #if ENABLE_TIME_PROFILING
     display_time = profiler_stop(display_time);
     printf("Display time: %3.3f ms.\n",

@@ -26,6 +26,10 @@
 #include "sds_data_in.h"
 
 #include "profiler.h"
+#ifdef USE_SEGGER_SYSVIEW
+#include "SEGGER_SYSVIEW.h"
+#include "sysview_markers.h"
+#endif
 
 
 #ifdef SDS_PLAY
@@ -196,6 +200,15 @@ __NO_RETURN void AlgorithmThread (void *argument) {
   // Initialize algorithm under test
   InitAlgorithm();
 
+#ifdef USE_SEGGER_SYSVIEW
+  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_CAPTURE, "Capture");
+  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_ALGORITHM, "Total Algorithm");
+  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_PRE_PROCESS, "Pre-process");
+  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_INFERENCE, "Inference");
+  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_POST_PROCESS, "Post-process");
+  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_DISPLAY, "Display");
+#endif
+
   for (;;) {
     if (sdsStreamingState == SDS_STREAMING_START) {
       // Request to start streaming, transit to active state (synchronus to main loop)
@@ -206,6 +219,9 @@ __NO_RETURN void AlgorithmThread (void *argument) {
       sdsStreamingState = SDS_STREAMING_STOP_SAFE;
     }
 
+#ifdef USE_SEGGER_SYSVIEW
+    SEGGER_SYSVIEW_MarkStart(SYSVIEW_MARKER_CAPTURE);
+#endif
 #if ENABLE_TIME_PROFILING
     capture_time = profiler_start();
 #endif
@@ -216,12 +232,14 @@ __NO_RETURN void AlgorithmThread (void *argument) {
       continue;
     }
   
+#ifdef USE_SEGGER_SYSVIEW
+    SEGGER_SYSVIEW_MarkStop(SYSVIEW_MARKER_CAPTURE);
+#endif
 #if ENABLE_TIME_PROFILING
     capture_time = profiler_stop(capture_time);
     printf("Capture time: %3.3f ms.\n",
            profiler_cycles_to_ms(capture_time, CPU_FREQ_HZ));
 #endif
-
 
 #ifndef SDS_PLAY
     if ((sdsStreamingState == SDS_STREAMING_ACTIVE) || (sdsStreamingState == SDS_STREAMING_STOP)) {
@@ -233,6 +251,9 @@ __NO_RETURN void AlgorithmThread (void *argument) {
     }
 #endif
 
+#ifdef USE_SEGGER_SYSVIEW
+    SEGGER_SYSVIEW_MarkStart(SYSVIEW_MARKER_ALGORITHM);
+#endif
 #if ENABLE_TIME_PROFILING
     total_usecase_time = profiler_start();
 #endif
@@ -243,6 +264,9 @@ __NO_RETURN void AlgorithmThread (void *argument) {
       continue;
     }
 
+#ifdef USE_SEGGER_SYSVIEW
+    SEGGER_SYSVIEW_MarkStop(SYSVIEW_MARKER_ALGORITHM);
+#endif
 #if ENABLE_TIME_PROFILING
     total_usecase_time = profiler_stop(total_usecase_time) + capture_time;
     printf("Total usecase time: %3.3f ms.\n",
