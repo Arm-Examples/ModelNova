@@ -22,6 +22,7 @@
 #include "image_processing_func.h"
 #include CMSIS_device_header
 #include "arm_memory_allocator.h"
+#include "arm_perf_monitor.h"
 #include "profiler.h"
 #ifdef USE_SEGGER_SYSVIEW
 #include "SEGGER_SYSVIEW.h"
@@ -999,6 +1000,9 @@ bool verify_result(RunnerContext& ctx, const void* model_pte) {
 bool run_inference(RunnerContext& ctx) {
     Error status = Error::Ok;
     int n = 0;
+#ifdef USE_PERFORMANCE_MONITOR
+    StartMeasurements();
+#endif
     for (n = 0; n < num_inferences; n++) {
 
         std::vector<std::pair<char*, size_t>> input_buffers;
@@ -1015,7 +1019,7 @@ bool run_inference(RunnerContext& ctx) {
         }
 
 #ifdef USE_SEGGER_SYSVIEW
-    SEGGER_SYSVIEW_MarkStart(SYSVIEW_MARKER_INFERENCE);
+        SEGGER_SYSVIEW_MarkStart(SYSVIEW_MARKER_INFERENCE);
 #endif
 #if ENABLE_TIME_PROFILING
         inference_time = profiler_start();
@@ -1029,7 +1033,7 @@ bool run_inference(RunnerContext& ctx) {
                                  temp_allocation_pool);
 
 #ifdef USE_SEGGER_SYSVIEW
-    SEGGER_SYSVIEW_MarkStop(SYSVIEW_MARKER_INFERENCE);
+        SEGGER_SYSVIEW_MarkStop(SYSVIEW_MARKER_INFERENCE);
 #endif
 #if ENABLE_TIME_PROFILING
         inference_time = profiler_stop(inference_time);
@@ -1037,6 +1041,9 @@ bool run_inference(RunnerContext& ctx) {
                profiler_cycles_to_ms(inference_time, CPU_FREQ_HZ));
 #endif
     }
+#ifdef USE_PERFORMANCE_MONITOR
+    StopMeasurements(num_inferences);
+#endif
 
     ET_CHECK_MSG(status == Error::Ok,
                  "Execution of method %s failed with status 0x%" PRIx32,
