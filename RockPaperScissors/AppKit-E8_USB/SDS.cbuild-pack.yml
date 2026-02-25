@@ -22,6 +22,7 @@ cbuild-pack:
     - resolved-pack: ARM::SDS@2.1.0-rc0
       selected-by-pack:
         - ARM::SDS@^2.0.1-0
+        - ARM::SDS@^2.1.0-0
     - resolved-pack: ARM::ethos-u-core-driver@1.25.2
       selected-by-pack:
         - ARM::ethos-u-core-driver@^1.25.2

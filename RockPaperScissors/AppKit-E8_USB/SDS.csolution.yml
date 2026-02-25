@@ -62,5 +62,4 @@ solution:
 
   # List related projects.
   projects:
-    - project: datatest/DataTest.cproject.yml
     - project: algorithm/AlgorithmTest.cproject.yml
