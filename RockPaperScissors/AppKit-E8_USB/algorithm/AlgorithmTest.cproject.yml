@@ -50,6 +50,7 @@ project:
         - file: arm_executor_runner.h
         - file: arm_perf_monitor.cpp
         - file: arm_perf_monitor.h
+        - file: sysview_log.c
         - file: image_processing_func.c
         - file: image_processing_func.h
         - file: sds_data_in_user.c
