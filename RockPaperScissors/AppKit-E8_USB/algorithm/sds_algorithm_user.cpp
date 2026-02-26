@@ -192,7 +192,7 @@ int32_t ExecuteAlgorithm(uint8_t *in_buf, uint32_t in_num,
 
     /* ---- Display: copy ML frame to LCD framebuffer ---- */
 #ifdef USE_SEGGER_SYSVIEW
-    SEGGER_SYSVIEW_MarkStart(SYSVIEW_MARKER_DISPLAY);
+    SEGGER_SYSVIEW_MarkStart(SYSVIEW_MARKER_OUTPUT_DATA);
 #endif
 #if ENABLE_TIME_PROFILING
     uint32_t display_time = profiler_start();
@@ -222,7 +222,7 @@ int32_t ExecuteAlgorithm(uint8_t *in_buf, uint32_t in_num,
         DISPLAY_SWAP_RB);
 
 #ifdef USE_SEGGER_SYSVIEW
-    SEGGER_SYSVIEW_MarkStop(SYSVIEW_MARKER_DISPLAY);
+    SEGGER_SYSVIEW_MarkStop(SYSVIEW_MARKER_OUTPUT_DATA);
 #endif
 #if ENABLE_TIME_PROFILING
     display_time = profiler_stop(display_time);

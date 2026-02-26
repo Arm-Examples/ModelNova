@@ -29,6 +29,11 @@
 #include "app_setup.h"
 #include "image_processing_func.h"
 
+#ifdef USE_SEGGER_SYSVIEW
+#include "SEGGER_SYSVIEW.h"
+#include "sysview_markers.h"
+#endif
+
 /* Reference to the underlying CMSIS vStream VideoIn driver */
 extern vStreamDriver_t          Driver_vStreamVideoIn;
 #define vStream_VideoIn       (&Driver_vStreamVideoIn)
@@ -107,6 +112,10 @@ int32_t GetInputData (uint8_t *buf, uint32_t max_len) {
     return -1;
   }
 
+#ifdef USE_SEGGER_SYSVIEW
+    SEGGER_SYSVIEW_MarkStart(SYSVIEW_MARKER_CAPTURE_IMAGE);
+#endif
+
   /* Start video capture */
   if (vStream_VideoIn->Start(VSTREAM_MODE_SINGLE) != VSTREAM_OK) {
     printf("Failed to start video capture\n");
@@ -116,6 +125,10 @@ int32_t GetInputData (uint8_t *buf, uint32_t max_len) {
   /* Wait for new video input frame */
   osThreadFlagsWait(0x1, osFlagsWaitAny, osWaitForever);
 
+#ifdef USE_SEGGER_SYSVIEW
+    SEGGER_SYSVIEW_MarkStop(SYSVIEW_MARKER_CAPTURE_IMAGE);
+#endif
+
     /* Get input video frame buffer */
   inFrame = (uint8_t *)vStream_VideoIn->GetBlock();
   if (inFrame == NULL) {
@@ -123,8 +136,20 @@ int32_t GetInputData (uint8_t *buf, uint32_t max_len) {
     return -1;
   }
 
+#ifdef USE_SEGGER_SYSVIEW
+    SEGGER_SYSVIEW_MarkStart(SYSVIEW_MARKER_CONVERT_IMAGE);
+#endif
+
   /* Convert input frame and place it into RGB_Image buffer */
   convert_frame_to_rgb(inFrame);
+
+#ifdef USE_SEGGER_SYSVIEW
+    SEGGER_SYSVIEW_MarkStop(SYSVIEW_MARKER_CONVERT_IMAGE);
+#endif
+
+#ifdef USE_SEGGER_SYSVIEW
+    SEGGER_SYSVIEW_MarkStart(SYSVIEW_MARKER_RESIZE_IMAGE);
+#endif
 
   /* Resize RGB image to fit ML model expected size */
   crop_resize_rgb565_to_rgb888(inFrame,
@@ -134,6 +159,9 @@ int32_t GetInputData (uint8_t *buf, uint32_t max_len) {
                                ML_IMAGE_WIDTH,
                                ML_IMAGE_HEIGHT);
 
+#ifdef USE_SEGGER_SYSVIEW
+    SEGGER_SYSVIEW_MarkStop(SYSVIEW_MARKER_RESIZE_IMAGE);
+#endif
 
   /* Release input frame */
   if (vStream_VideoIn->ReleaseBlock() != VSTREAM_OK) {

@@ -201,12 +201,15 @@ __NO_RETURN void AlgorithmThread (void *argument) {
   InitAlgorithm();
 
 #ifdef USE_SEGGER_SYSVIEW
-  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_CAPTURE, "Capture");
-  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_ALGORITHM, "Total Algorithm");
-  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_PRE_PROCESS, "Pre-process");
-  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_INFERENCE, "Inference");
-  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_POST_PROCESS, "Post-process");
-  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_DISPLAY, "Display");
+  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_INPUT_DATA,    "Input Data");
+  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_CAPTURE_IMAGE, "Capture Image");
+  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_CONVERT_IMAGE, "Convert Image");
+  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_RESIZE_IMAGE,  "Resize Image");
+  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_ALGORITHM,     "Algorithm");
+  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_PRE_PROCESS,   "Pre-process");
+  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_INFERENCE,     "Inference");
+  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_POST_PROCESS,  "Post-process");
+  SEGGER_SYSVIEW_NameMarker(SYSVIEW_MARKER_OUTPUT_DATA,   "Output Data");
 #endif
 
   for (;;) {
@@ -220,7 +223,7 @@ __NO_RETURN void AlgorithmThread (void *argument) {
     }
 
 #ifdef USE_SEGGER_SYSVIEW
-    SEGGER_SYSVIEW_MarkStart(SYSVIEW_MARKER_CAPTURE);
+    SEGGER_SYSVIEW_MarkStart(SYSVIEW_MARKER_INPUT_DATA);
 #endif
 #if ENABLE_TIME_PROFILING
     capture_time = profiler_start();
@@ -233,7 +236,7 @@ __NO_RETURN void AlgorithmThread (void *argument) {
     }
   
 #ifdef USE_SEGGER_SYSVIEW
-    SEGGER_SYSVIEW_MarkStop(SYSVIEW_MARKER_CAPTURE);
+    SEGGER_SYSVIEW_MarkStop(SYSVIEW_MARKER_INPUT_DATA);
 #endif
 #if ENABLE_TIME_PROFILING
     capture_time = profiler_stop(capture_time);
