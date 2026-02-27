@@ -30,8 +30,6 @@ In VS Code, use the menu command **Terminal - Run Tasks** and execute:
 
 - `"Alif: Install M55_HE or M55_HP debug stubs (single core configuration)"`
 
-For Windows, ensure that the Terminal default is Git Bash or PowerShell.
-
 > Note:
 >
 > - Configure SW4 to position SE (Secure UART) to enable SETOOLS communication with the device.
