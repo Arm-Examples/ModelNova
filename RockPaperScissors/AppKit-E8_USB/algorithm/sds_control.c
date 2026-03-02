@@ -35,6 +35,11 @@ osThreadAttr_t attrAlgorithmThread = {
   .name = "Algorithm"
 };
 
+// StdinPollThread thread attributes
+osThreadAttr_t attrStdinPollThread = {
+  .name = "StdinPoll"
+};
+
 // SDS error information
 sdsError_t sdsError = { 0U, 0U, NULL, 0U };
 
@@ -43,6 +48,9 @@ volatile uint8_t sdsStreamingState = SDS_STREAMING_INACTIVE;
 
 // Idle time counter
 static volatile uint32_t idle_cnt;
+
+// Command received over STDIN
+static volatile char stdin_cmd = 0;
 
 // Recorder/player event callback
 static void rec_play_event_callback (sdsRecPlayId_t id, uint32_t event) {
@@ -93,8 +101,20 @@ static uint32_t simGetSignal (uint32_t mask) {
 }
 #endif
 
+// STDIN polling thread function.
+__NO_RETURN void StdinPollThread (void *argument) {
+  char ch;
+
+  for (;;) {
+    ch = getchar();
+    if ((ch != '\r') && (ch != '\n')) {
+      stdin_cmd = ch;
+    }
+  }
+}
+
 // Recording/playback control thread function.
-// Toggle recording/playback via USER push-button.
+// Toggle recording/playback via USER push-button or receiving 's' via STDIO interface.
 // Toggle LED0 every 1 second to see that the thread is alive.
 // Turn on LED1 when recording/playback is started, turn it off when recording/playback is stopped.
 __NO_RETURN void sdsControlThread (void *argument) {
@@ -173,6 +193,12 @@ __NO_RETURN void sdsControlThread (void *argument) {
     osThreadExit();
   }
 
+  // Create STDIN polling thread
+  if (osThreadNew(StdinPollThread, NULL, &attrStdinPollThread) == NULL) {
+    printf("STDIN Polling Thread creation failed!\n");
+    osThreadExit();
+  }
+
   interval_time = osKernelGetTickCount();
   prev_cnt      = idle_cnt;
 
@@ -185,6 +211,19 @@ __NO_RETURN void sdsControlThread (void *argument) {
 #endif
     keypress = btn_val & ~btn_prev;
     btn_prev = btn_val;
+
+    // Handle command received over STDIN
+    // 's' or 'S' emulate button press, thus start/stop the recording or playback
+    switch (stdin_cmd) {
+      case 's':
+      case 'S':
+        keypress  = vioBUTTON0;
+        stdin_cmd = 0;
+        break;
+
+      default:
+        break;
+    }
 
     // Control SDS recorder/player
     switch (sdsStreamingState) {

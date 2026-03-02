@@ -44,7 +44,7 @@ When running the application on the target, you may capture the input data with 
 
 1. Start [SDSIO-Server](https://arm-software.github.io/SDS-Framework/main/utilities.html#sdsio-server) on your host computer with `sdsio-server usb`
 2. Connect the host computer to the SOC USB
-3. Start/stop recording using the Joystick push button.
+3. Start/stop recording using the Joystick push button, or by sending the `s` character to the board via the STDIO (UART4) interface.
 
 **Example console output:**
 
