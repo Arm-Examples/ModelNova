@@ -69,15 +69,15 @@ The AlgorithmTest project demonstrates real-world usage of the SDS Framework on 
 
 This project, when configured as **Recorder**:
 
-- **Captures on-board camera stream** via SDS recording stream (DataInput.<n>.sds file)
+- **Captures on-board camera stream** via SDS recording stream (ML_In.<n>.sds file)
 - **Executes ML inference** using an object detection ML model
-- **Captures algorithm output** via SDS recording stream (DataOutput.<n>.sds file)
+- **Captures algorithm output** via SDS recording stream (ML_Out.<n>.sds file)
 
 Alternatively, when configured as **Player**:
 
-- **Replays pre-recorded video stream** via SDS playback stream (DataInput.<n>.sds file)
+- **Replays pre-recorded video stream** via SDS playback stream (ML_In.<n>.sds file)
 - **Executes ML inference** using an object detection ML model
-- **Captures algorithm output** via SDS recording stream (DataOutput.<m>.sds file)
+- **Captures algorithm output** via SDS recording stream (ML_Out.<m>.sds file)
 
 ### Setup
 
@@ -139,11 +139,11 @@ Starting USB Server...
 Waiting for SDSIO Client USB device...
 DSIO Client USB device connected.
 Ping received.
-Record:   DataInput (.\DataInput.0.sds).
-Record:   DataOutput (.\DataOutput.0.sds).
+Record:   ML_In (.\ML_In.0.sds).
+Record:   ML_Out (.\ML_Out.0.sds).
 ..............
-Closed:   DataInput (.\DataInput.0.sds).
-Closed:   DataOutput (.\DataOutput.0.sds).
+Closed:   ML_In (.\ML_In.0.sds).
+Closed:   ML_Out (.\ML_Out.0.sds).
 ```
 
 **Serial Monitor Output:**
@@ -159,7 +159,7 @@ SDS recording (#0) stopped
 ====
 ```
 
-Each run records two files: `DataInput.<n>.sds` and `DataOutput.<0>.sds` in the directory
+Each run records two files: `ML_In.<n>.sds` and `ML_Out.<0>.sds` in the directory
 where SDSIO-Server was started. `<n>` is a sequential number.
 
 #### Check SDS Files
@@ -168,17 +168,16 @@ The [SDS-Check](https://arm-software.github.io/SDS-Framework/main/utilities.html
 utility verifies SDS files for consistency. For example:
 
 ```bash
->sds-check.py -s DataInput.0.sds
-File Name         : DataInput.0.sds
-File Size         : 2.212.000 bytes
-Number of Records : 20
-Recording Time    : 6 s
-Recording Interval: 320 ms
-Data Size         : 2.211.840 bytes
-Data Block        : 110.592 bytes
-Data Rate         : 345.600 byte/s
-Max Jitter        : 1 ms, in record 4
-Max Delta Time    : 321 ms, in record 4
+>sds-check.py -s ML_In.0.sds
+File Name         : ML_In.0.sds
+File Size         : 1.505.360 bytes
+Number of Records : 10
+Recording Time    : 1.800 ms
+Recording Interval: 200 ms
+Data Size         : 1.505.280 bytes
+Data Block        : 150.528 bytes
+Data Rate         : 752.640 byte/s
+Jitter            : Not detected
 Validation passed
 ```
 
@@ -196,11 +195,11 @@ To execute the **playback** test, follow the steps below:
    (STDIO).
 7. Connect the MCU USB (J2) of the AppKit-E8-AIML to the PC running SDSIO-Server.
 8. Reset the board with RESET (SW1) button and observe the application output (STDIO).
-9.  Press a joystick (SW2) on the board to start playback of `DataInput` and recording of `DataOutput`.
-10. Wait for playback to finish, it will finish automatically when all data from `DataInput.0.sds` SDS file was played
+9.  Press a joystick (SW2) on the board to start playback of `ML_In` and recording of `ML_Out`.
+10. Wait for playback to finish, it will finish automatically when all data from `ML_In.0.sds` SDS file was played
     back.
 
-The stream `DataInput.<n>.sds` is read back and the algorithm processes this data. The stream `DataOutput.<m>.sds` is
+The stream `ML_In.<n>.sds` is read back and the algorithm processes this data. The stream `ML_Out.<m>.sds` is
 written whereby `<m>` is the next available file index.
 
 > Note:
@@ -218,16 +217,16 @@ Starting USB Server...
 Waiting for SDSIO Client USB device...
 DSIO Client USB device connected.
 Ping received.
-Playback: DataInput (.\DataInput.0.sds).
-Record:   DataOutput (.\DataOutput.1.sds).
+Playback: ML_In (.\ML_In.0.sds).
+Record:   ML_Out (.\ML_Out.0.sds).
 ......
-Closed:   DataInput (.\DataInput.0.sds).
-Closed:   DataOutput (.\DataOutput.1.sds).
+Closed:   ML_In (.\ML_In.0.sds).
+Closed:   ML_Out (.\ML_Out.0.sds).
 ```
 
 > Note:
 >
-> DataOutput file recorded during playback should be identical to the one recorded earlier.
+> ML_Out file recorded during playback should be identical to the one recorded earlier.
 
 ### Key Components
 

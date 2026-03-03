@@ -77,7 +77,7 @@ int32_t OpenStreams (void) {
 #ifdef SDS_PLAY
   // Open stream for playback of input data
   // Check https://arm-software.github.io/SDS-Framework/main/theory.html#filenames for details on playback filename
-  playIdDataInput = sdsPlayOpen("DataInput", sds_play_buf_data_in, sizeof(sds_play_buf_data_in));
+  playIdDataInput = sdsPlayOpen("ML_In", sds_play_buf_data_in, sizeof(sds_play_buf_data_in));
   SDS_ASSERT(playIdDataInput != NULL);
   if (playIdDataInput == NULL) {
     sdsStreamingState = SDS_STREAMING_END;      // end simulation
@@ -86,7 +86,7 @@ int32_t OpenStreams (void) {
   }
 #else
   // Open stream for recording of input data
-  recIdDataInput = sdsRecOpen("DataInput", sds_rec_buf_data_in, sizeof(sds_rec_buf_data_in));
+  recIdDataInput = sdsRecOpen("ML_In", sds_rec_buf_data_in, sizeof(sds_rec_buf_data_in));
   SDS_ASSERT(recIdDataInput != NULL);
   if (recIdDataInput == NULL) {
     printf("Failed to open SDS stream for recording of input data!\n");
@@ -96,7 +96,7 @@ int32_t OpenStreams (void) {
 
   if (status == 0) {
     // Open stream for recording of output data
-    recIdDataOutput = sdsRecOpen("DataOutput", sds_rec_buf_data_out, sizeof(sds_rec_buf_data_out));
+    recIdDataOutput = sdsRecOpen("ML_Out", sds_rec_buf_data_out, sizeof(sds_rec_buf_data_out));
     SDS_ASSERT(recIdDataOutput != NULL);
     if (recIdDataOutput == NULL) {
       printf("ERROR: Failed to open SDS stream for recording of output data!\n");
