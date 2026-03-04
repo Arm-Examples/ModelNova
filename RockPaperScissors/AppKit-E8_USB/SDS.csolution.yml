@@ -35,8 +35,9 @@ solution:
             name: J-Link Server
             clock: 4000000
             protocol: swd
+            start-pname: M55_HP
           images:
-            - project-context: AlgorithmTest.DebugRec
+            - project-context: AlgorithmTest.ReleaseRec
 
   # List of different build configurations.
   build-types:

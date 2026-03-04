@@ -66,21 +66,11 @@ project:
       type:  Board
     - layer: $AI-Layer$
       type:  AI / Executorch
-    - layer: $runtime1-Layer$
-      type: AI / Executorch Stage 1 Source
-    - layer: $runtime2-Layer$
-      type: AI / Executorch Stage 2 Source
 
   # List of miscellaneous tool-specific controls
   misc:
   - for-compiler: GCC
     Link:
-      - -Wl,--whole-archive
-      - $SolutionDir()$/ai_layer/engine/lib/libexecutorch.a
-      - $SolutionDir()$/ai_layer/engine/lib/libquantized_kernels.a
-      - $SolutionDir()$/ai_layer/engine/lib/libquantized_ops_lib.a
-      - $SolutionDir()$/ai_layer/engine/lib/libexecutorch_delegate_ethos_u.a
-      - -Wl,--no-whole-archive
       - -Wl,-u,_printf_float
 
   output:
