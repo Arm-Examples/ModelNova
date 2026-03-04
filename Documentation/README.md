@@ -154,8 +154,8 @@ SystemView data can be captured with a CMSIS-DAP adapter and pyOCD. Use these st
 - Build the application.
 - Program the application to the target.
 - Run the task `pyOCD Run` which starts the application and captures SystemView data.
-- Stop the task by pressing Ctrl+C. SystemView data is then saved into a .*SVDat file in the output folder.
-- Open the .*SVDat file with the SystemView tool to review the timing information.
+- Stop the task by pressing Ctrl+C. SystemView data is then saved into a *.SVDat file in the output folder.
+- Open the *.SVDat file with the SystemView tool to review the timing information.
 
 ![System View](./image/SystemView.png "System View")
 
