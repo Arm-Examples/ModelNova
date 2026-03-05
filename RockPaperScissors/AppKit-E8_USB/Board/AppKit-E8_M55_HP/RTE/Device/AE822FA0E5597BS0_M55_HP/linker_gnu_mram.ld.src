@@ -177,7 +177,7 @@ SECTIONS
 
   .model_data (NOLOAD) : ALIGN(16)
   {
-    *(input_data_sec)
+    *(.bss.input_data_sec)
     . = ALIGN(16);
   } > SRAM1
 
@@ -186,7 +186,7 @@ SECTIONS
     *(.bss.sds_algo_data_in_buf)
     *(.bss.sds_algo_data_out_buf)
     *(.bss.rgb_image_buf)
-    *(.bss.NoInit.activation_buf_sram)
+    *(.bss.activation_buf_sram)
   } > SRAM1
 
   .bss (NOLOAD) :

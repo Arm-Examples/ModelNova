@@ -104,8 +104,8 @@ LR_ROM __ROM_BASE NOCOMPRESS __ROM_SIZE  {    ; load region size_region
   RW_SRAM APP_SRAM_BASE APP_SRAM_SIZE
   {
     /* ExecuTorch large buffers */
-    * (input_data_sec)
-    * (.bss.NoInit.activation_buf_sram)
+    * (.bss.input_data_sec)
+    * (.bss.activation_buf_sram)
 
     /* Everything else */
     .ANY (+RW +ZI)

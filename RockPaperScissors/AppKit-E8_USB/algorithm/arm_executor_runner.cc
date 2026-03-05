@@ -194,7 +194,7 @@ const size_t method_allocation_pool_size =
     ET_ARM_BAREMETAL_METHOD_ALLOCATOR_POOL_SIZE;
 
 unsigned char __attribute__((
-    section("input_data_sec"),
+    section(".bss.input_data_sec"),
     aligned(16))) method_allocation_pool[method_allocation_pool_size];
 
 const int num_inferences = 1;
@@ -202,7 +202,7 @@ const int num_inferences = 1;
 const size_t temp_allocation_pool_size =
     ET_ARM_BAREMETAL_SCRATCH_TEMP_ALLOCATOR_POOL_SIZE;
 unsigned char __attribute__((
-    section(".bss.NoInit.activation_buf_sram"),
+    section(".bss.activation_buf_sram"),
     aligned(16))) temp_allocation_pool[temp_allocation_pool_size];
 
 #if ENABLE_TIME_PROFILING
