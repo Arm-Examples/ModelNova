@@ -14,16 +14,29 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-name: Run DebugRec AC6
+name: Run DebugPlay AC6
 on:
 
   workflow_dispatch:
-  
+  #pull_request:
+  #  branches: [main]
+  push:
+    branches: [main]
+
 jobs:
   CI:
     runs-on: [self-hosted, rsp-p5-01]
 
     steps:
+    - name: Start the SDSIO server on the Raspberry Pi
+      run: |
+        if ! pgrep -f "sdsio-server.py usb" > /dev/null; then
+            nohup python ~/SDS-Framework/utilities/sdsio-server.py usb > ~/SDS-Framework/utilities/sdsio-server.log 2>&1 &
+            sleep 2
+        fi
+        pgrep -f "sdsio-server.py usb"
+        tail -n 20 ~/SDS-Framework/utilities/sdsio-server.log || true
+
     - name: Checkout repository
       uses: actions/checkout@v6
 
@@ -31,10 +44,25 @@ jobs:
       uses: dawidd6/action-download-artifact@v17
       with:
         workflow: build_target_set.yml
-        name: DebugPlay_AC6_ULPlus
+        name: CI-ULink_AC6
         path: ./RockPaperScissors/AppKit-E8_USB/out
 
     - name: Flash and run DebugPlay_AC6_ULPlus
       working-directory: ./RockPaperScissors/AppKit-E8_USB/out
       run: |
         pyocd load --uid L96807771A --cbuild-run SDS+AppKit-E8-U85.cbuild-run.yml
+        pyocd run --uid L96807771A --cbuild-run SDS+AppKit-E8-U85.cbuild-run.yml -O reset_type=hardware --timelimit 10
+
+    - name: Stop the SDSIO server on the Raspberry Pi
+      run: |
+        PIDS=$(pgrep -f "sdsio-server.py usb") || true
+        if [ -n "$PIDS" ]; then
+            echo "Stopping SDSIO server (PIDs: $PIDS)"
+            kill $PIDS
+        else
+            echo "No SDSIO server running"
+        fi
+
+    - name: Show content of the sdsio-server.log file
+      run: |        
+        cat ~/SDS-Framework/utilities/sdsio-server.log

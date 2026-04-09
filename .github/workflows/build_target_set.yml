@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-name: Build DebugRec AC6
+name: Build DebugPlay AC6
 on:
 
   workflow_dispatch:
@@ -22,9 +22,6 @@ on:
   #  branches: [main]
   push:
     branches: [main]
-
-  #schedule:
-  #  - cron: '00 20 * * 6'
 
 jobs:
   CI:
@@ -54,14 +51,15 @@ jobs:
         key: ModelNova
         path: /home/runner/.cache/arm/packs/.Download
 
-    - name: Build for target-set for ULinkPlus with AC6 Compiler
+    - name: Build the Playback debug target-set for the ULinkPlus with AC6 Compiler
       working-directory: ./RockPaperScissors/AppKit-E8_USB
       run: |
-        cbuild SDS.csolution.yml --active AppKit-E8-U85@TS_ULP --packs
+        cbuild SDS.csolution.yml --active AppKit-E8-U85@CI-ULink --packs
 
-    - name: Upload output for target set AppKit-E8-U85@TS_ULP 
+    - name: Upload output for target set AppKit-E8-U85@TGS_ULP_DBG_REC build with AC6
       uses: actions/upload-artifact@v7
       with:
-        name: DebugPlay_AC6_ULPlus
+        name: CI-ULink_AC6
         path: |
-          ./RockPaperScissors/AppKit-E8_USB/out
+         ./RockPaperScissors/AppKit-E8_USB/out
+    
