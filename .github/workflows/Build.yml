@@ -1,0 +1,84 @@
+# Copyright (c) 2026 Arm Limited (or its affiliates). All rights reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+name: Build
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  # schedule:
+  #   - cron: '00 20 * * 6'
+
+jobs:
+  CI:
+    strategy:
+      fail-fast: false
+      matrix:
+        context: [
+          # toolchain,  example directory,                        project name,          build-type,              target-type,                 artifact name,
+          { tool: AC6,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: DebugPlay,   target-type: AppKit-E8-U85,  artf_name: AC6_DebugPlay_AppKit-E8-U85 },
+          { tool: AC6,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: DebugRec,    target-type: AppKit-E8-U85,  artf_name: AC6_DebugRec_AppKit-E8-U85 },
+          { tool: AC6,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: ReleasePlay, target-type: AppKit-E8-U85,  artf_name: AC6_ReleasePlay_AppKit-E8-U85 },
+          { tool: AC6,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: ReleaseRec,  target-type: AppKit-E8-U85,  artf_name: AC6_ReleaseRec_AppKit-E8-U85 },
+          # { tool: GCC,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: DebugPlay,   target-type: AppKit-E8-U85,  artf_name: GCC_DebugPlay_AppKit-E8-U85 },
+          # { tool: GCC,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: DebugRec,    target-type: AppKit-E8-U85,  artf_name: GCC_DebugRec_AppKit-E8-U85 },
+          # { tool: GCC,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: ReleasePlay, target-type: AppKit-E8-U85,  artf_name: GCC_ReleasePlay_AppKit-E8-U85 },
+          # { tool: GCC,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: ReleaseRec,  target-type: AppKit-E8-U85,  artf_name: GCC_ReleaseRec_AppKit-E8-U85 },
+          # { tool: IAR,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: DebugPlay,   target-type: AppKit-E8-U85,  artf_name: IAR_DebugPlay_AppKit-E8-U85 },
+          # { tool: IAR,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: DebugRec,    target-type: AppKit-E8-U85,  artf_name: IAR_DebugRec_AppKit-E8-U85 },
+          # { tool: IAR,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: ReleasePlay, target-type: AppKit-E8-U85,  artf_name: IAR_ReleasePlay_AppKit-E8-U85 },
+          # { tool: IAR,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: ReleaseRec,  target-type: AppKit-E8-U85,  artf_name: IAR_ReleaseRec_AppKit-E8-U85 }
+        ]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Activate vcpkg
+        uses: ARM-software/cmsis-actions/vcpkg@v1
+        with:
+          config: "./vcpkg-configuration.json"
+          cache: "ModelNova"
+
+      - name: Activate Arm tool license
+        uses: ARM-software/cmsis-actions/armlm@v1
+
+      - name: Initialize CMSIS pack root folder
+        run: |
+          cpackget init https://www.keil.com/pack/index.pidx
+          cpackget update-index
+
+      - name: Cache downloaded packs
+        uses: actions/cache@v5
+        with:
+          key: ModelNova
+          path: /home/runner/.cache/arm/packs/.Download
+
+      - name: ${{matrix.context.tool}} Build-Test for context ${{matrix.context.proj}}.${{matrix.context.build-type}}+${{matrix.context.target-type}}
+        working-directory: ${{matrix.context.dir}}
+        run: |
+          cbuild SDS.csolution.yml --context ${{matrix.context.proj}}.${{matrix.context.build-type}}+${{matrix.context.target-type}} --toolchain ${{matrix.context.tool}} --packs
+
+      - name:  Upload ${{matrix.context.tool}} output for context ${{matrix.context.proj}}.${{matrix.context.build-type}}+${{matrix.context.target-type}}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{matrix.context.artf_name}}
+          path: ${{matrix.context.dir}}/out/${{matrix.context.proj}}/${{matrix.context.target-type}}
+          include-hidden-files: true

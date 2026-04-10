@@ -1,0 +1,67 @@
+# Copyright (c) 2026 Arm Limited (or its affiliates). All rights reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+name: HIL RockPaperScissors AppKit-E8
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  CI:
+    runs-on: [self-hosted, rsp-p5-01]
+
+    steps:
+      - name: Start the SDSIO server on the Raspberry Pi
+        run: |
+          if ! pgrep -f "sdsio-server.py usb" > /dev/null; then
+              nohup python ~/SDS-Framework/utilities/sdsio-server.py usb > ~/SDS-Framework/utilities/sdsio-server.log 2>&1 &
+              sleep 2
+          fi
+          pgrep -f "sdsio-server.py usb"
+          tail -n 20 ~/SDS-Framework/utilities/sdsio-server.log || true
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Download Build Artifact
+        uses: dawidd6/action-download-artifact@v17
+        with:
+          workflow: Build_RPS_AppKit-E8.yml
+          name: RPS_AppKit-E8-U85_HIL
+          path: ./RockPaperScissors/AppKit-E8_USB/out
+
+      - name: Flash and run using pyOCD
+        working-directory: ./RockPaperScissors/AppKit-E8_USB/out
+        run: |
+          pyocd load --uid L96807771A --cbuild-run SDS+AppKit-E8-U85.cbuild-run.yml
+          pyocd run --uid L96807771A --cbuild-run SDS+AppKit-E8-U85.cbuild-run.yml -O reset_type=hardware --timelimit 10
+
+      - name: Stop the SDSIO server on the Raspberry Pi
+        run: |
+          PIDS=$(pgrep -f "sdsio-server.py usb") || true
+          if [ -n "$PIDS" ]; then
+              echo "Stopping SDSIO server (PIDs: $PIDS)"
+              kill $PIDS
+          else
+              echo "No SDSIO server running"
+          fi
+
+      - name: Show content of the sdsio-server.log file
+        run: |        
+          cat ~/SDS-Framework/utilities/sdsio-server.log

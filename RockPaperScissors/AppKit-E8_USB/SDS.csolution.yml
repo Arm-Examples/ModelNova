@@ -33,10 +33,10 @@ solution:
             name: J-Link Server
             clock: 4000000
             protocol: swd
-            start-pname: M55_HP            
+            start-pname: M55_HP
           images:
-            - project-context: AlgorithmTest.DebugPlay
-        - set: CI-ULink
+            - project-context: AlgorithmTest.DebugRec
+        - set: HIL
           debugger:
             name: ULINKplus@pyOCD
             clock: 10000000
