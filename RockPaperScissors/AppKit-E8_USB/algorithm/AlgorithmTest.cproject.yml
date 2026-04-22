@@ -11,7 +11,7 @@ project:
       provides:
         - CMSIS-RTOS2
       consumes:
-        - SDS_REC_PLAY
+        - SDS
         - CMSIS_VIO
         - STDIN
         - STDOUT
@@ -34,25 +34,17 @@ project:
         - file: ../README.md
     - group: Application
       files:
-        - file: app_main.c
         - file: sds_control.c
         - file: sds_main.c
-        - file: sds_algorithm_user.cpp
-        - file: sds_algorithm_config.h
+        - file: algorithm_config.h
+        - file: algorithm_user.cpp
+        - file: data_in_user.c
         - file: arm_memory_allocator.h
         - file: arm_memory_allocator.cc
         - file: arm_executor_runner.cc
         - file: arm_executor_runner.h
         - file: image_processing_func.c
         - file: image_processing_func.h
-        - file: sds_data_in_user.c
-          for-context:
-            - .DebugRec
-            - .ReleaseRec
-        - file: sds_data_in_play.c
-          for-context:
-            - .DebugPlay
-            - .ReleasePlay
 
   components:
     - component: CMSIS:OS Tick:SysTick
