@@ -12,7 +12,7 @@ layer:
         - CMSIS_USB_Device
         - CMSIS-RTOS2
       provides:
-        - SDS_STREAM
+        - SDS
         - SDS_IO
 
   components:
