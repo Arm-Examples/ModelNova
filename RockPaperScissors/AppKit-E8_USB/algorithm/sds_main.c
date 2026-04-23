@@ -57,13 +57,13 @@ int32_t OpenStreams (void) {
   // Open stream for playback or recording of input data, depending on the mode
   if (play != 0U) {                             // -- Playback
     // Check https://arm-software.github.io/SDS-Framework/main/theory.html#filenames for details on playback filename
-    sds_data_in_id = sdsOpen("DataInput", sdsModeRead, sds_data_in_buf, sizeof(sds_data_in_buf));
+    sds_data_in_id = sdsOpen("ML_In", sdsModeRead, sds_data_in_buf, sizeof(sds_data_in_buf));
   } else {                                      // -- Recording
-    sds_data_in_id = sdsOpen("DataInput", sdsModeWrite, sds_data_in_buf, sizeof(sds_data_in_buf));
+    sds_data_in_id = sdsOpen("ML_In", sdsModeWrite, sds_data_in_buf, sizeof(sds_data_in_buf));
   }
   // Open stream for recording of output data
   if (sds_data_in_id != NULL) {
-    sds_data_out_id = sdsOpen("DataOutput", sdsModeWrite, sds_data_out_buf, sizeof(sds_data_out_buf));
+    sds_data_out_id = sdsOpen("ML_Out", sdsModeWrite, sds_data_out_buf, sizeof(sds_data_out_buf));
   }
 
   SDS_ASSERT(sds_data_in_id  != NULL);
