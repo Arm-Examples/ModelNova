@@ -16,7 +16,7 @@ project:
         - STDIN
         - STDOUT
         - STDERR
-        - Heap: 65536
+        - Heap: +65536
 
   define:
     - OS_IDLE_THREAD_NAME: \"Idle\"
