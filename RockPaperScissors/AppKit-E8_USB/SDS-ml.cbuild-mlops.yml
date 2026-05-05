@@ -1,0 +1,35 @@
+cbuild-mlops:
+# Note: all paths are relative to the cbuild-mlops.yml file location.
+  generated-by: csolution version 2.13.0+p64-g79b66b5f
+  description: ML model for detecting Rock/Paper/Scissors images
+  processor:
+    type: Cortex-M55
+
+  npu:                              
+    type: Ethos-U85                 # taken from *.csolution, error when more than one NPU is in DFP and not specified in csolution 
+    macs: 256                       # taken from DFP
+
+  vela:                             # this node is only there for devices with NPU type Ethos-U
+    ini:  .cmsis/ensemble_vela.ini  # vela.ini file copied from DFP
+    options: "--accelerator-config ethos-u85-256 --system-config RTSS_HE_SRAM_MRAM --memory-mode Shared_Sram"
+
+  model:
+    clayer: ai_layer/ai_layer.clayer.yml
+    name: RPS
+
+  hardware:                         # for testing on hardware
+    active: AppKit-E8-U85           # target-set name passed to cbuild with option --active, i.e. cbuild SDS-ml.csolution.yml --active AppKit-E8-U85
+    cbuild-run: out/SDS-ml.AppKit-E8-U85.cbuild-run.yml        # cbuild-run file for execution on hardware using pyOCD (JLink needs command-line derived from output: node)
+    output:
+      - file: out/AppKit-E8-U85/Debug/AlgorithmTest.axf
+        type: elf
+
+  simulator:                        # for testing with simulation Models
+    active: SSE-320-U85@FVP-Test    # target-set name passed to cbuild with option --active, i.e. cbuild SDS-ml.csolution.yml --active SSE-320-U85@FVP-Test
+    cbuild-run: out/SDS-ml.SSE-320-U85.cbuild-run.yml        # cbuild-run file for execution on simulation (currently not used as there is no translator for FVP models).
+    output:
+      - file: out/SSE-320_U85/Debug/AlgorithmTest.axf
+        type: elf
+    model: FVP_Corstone_SSE-320     # name of the FVP model to use
+    config-file: Board/Corstone-320/fvp_config.txt   # configuration file for the ML model
+# FVP invocation: "FVP_Corstone_SSE-320 -f Board/Corstone-320/fvp_config.txt -a out/SSE-320_U85/Debug/AlgorithmTest.axf ..."    

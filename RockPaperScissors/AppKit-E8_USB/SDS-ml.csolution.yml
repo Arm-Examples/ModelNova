@@ -1,0 +1,96 @@
+solution:
+  description: SDS recorder/player reference example
+  created-for: CMSIS-Toolbox@2.12.0
+  cdefault:
+
+  # List of tested compilers that can be selected
+  select-compiler:
+    - compiler: AC6
+    - compiler: GCC
+    - compiler: IAR
+
+  mlops:
+    description: ML model for detecting Rock/Paper/Scissors images
+    npu: 
+      type: Ethos-U85           # select NPU as DFP has multiple
+    vela:
+      system: RTSS_HE_SRAM_MRAM  # system configuration from INI file
+      memory: Shared_Sram        # memory configuration from INI file
+      misc:                   # string with additional options for Vela
+    model:
+      clayer: $AI-Layer$      # path to layer or variable
+      name: RPS               # optional model name (default Algorithm), serves as namespace
+    hardware:                 # hardware target for testing
+      target-type: AppKit-E8-U85  # explicit target-type name (default: first target-type)
+    simulator:                # simulator target for testing
+      target-type: SSE-320-U85   # explicit target-type name (default: last target-type, check if debugger name: Arm-FVP)
+      target-set: FVP-Test       # explicit target-set name (default: last target-type, first set: check if debugger name: Arm-FVP)
+
+  compiler: AC6 # select compiler for solution
+
+  # This is a CMSIS-Toolbox Reference Application that requires a compatible board layer
+  # Refer to https://open-cmsis-pack.github.io/cmsis-toolbox/ReferenceApplications/ for more information
+
+  packs:
+    - pack: ARM::SDS@^3.0.0-0
+    - pack: AlifSemiconductor::Ensemble@^2.1.0-0
+
+  # List different hardware targets that are used to deploy the solution.
+  target-types:
+    - type: AppKit-E8-U85
+      device: AE822FA0E5597BS0
+      board: AppKit-E8-AIML
+      variables:
+        - Board-Layer: $SolutionDir()$/Board/AppKit-E8_M55_HP/Board_HP-U85.clayer.yml
+        - SDSIO-Layer: $SolutionDir()$/sdsio/usb/sdsio_usb.clayer.yml
+        - AI-Layer: $SolutionDir()$/ai_layer/ai_layer.clayer.yml
+      target-set:
+        - set: J-Link
+          debugger:
+            name: J-Link Server
+            clock: 4000000
+            protocol: swd
+            start-pname: M55_HP
+          images:
+            - project-context: AlgorithmTest.Debug
+        - set: HIL
+          debugger:
+            name: ULINKplus@pyOCD
+            clock: 10000000
+            protocol: swd
+            start-pname: M55_HP
+            telnet:
+              - pname: M55_HP
+                mode: console
+          images:
+            - project-context: AlgorithmTest.Debug
+
+    - type: SSE-320-U85  # Simulator (Cortex-M85 + Ethos-U85)
+      board: SSE-320
+      device: SSE-320-FVP
+      define:
+        - SIMULATOR
+      variables:
+        - Board-Layer: $SolutionDir()$/Board/Corstone-320/Board-U85.clayer.yml
+        - SDSIO-Layer: $SolutionDir()$/sdsio/fvp/sdsio_fvp.clayer.yml
+        - AI-Layer: $SolutionDir()$/ai_layer/ai_layer.clayer.yml
+      target-set:
+        - set: FVP-Test
+          debugger:
+            name: Arm-FVP
+            model: FVP_Corstone_SSE-320
+            config-file: Board/Corstone-320/fvp_config.txt
+
+  # List of different build configurations.
+  build-types:
+    - type: Debug
+      debug: on
+      optimize: debug
+
+    - type: Release
+      debug: off
+      optimize: balanced
+
+  # List related projects.
+  projects:
+    - project: algorithm/AlgorithmTest.cproject.yml
