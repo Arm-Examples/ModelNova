@@ -18,9 +18,9 @@ name: Run on AppKit-E8 Hardware
 on:
   workflow_dispatch:
   pull_request:
-    branches: [main]
+    branches: [v3]
   push:
-    branches: [main]
+    branches: [v3]
 
 jobs:
   CI:
@@ -43,7 +43,7 @@ jobs:
         uses: dawidd6/action-download-artifact@v17
         with:
           workflow: Build_RPS_AppKit-E8.yml
-          name: RPS_AppKit-E8-U85_HIL
+          name: Build for AppKit-E8 Hardware
           path: ./RockPaperScissors/AppKit-E8_USB/out
 
       - name: Flash and run using pyOCD
