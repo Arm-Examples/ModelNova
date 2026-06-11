@@ -18,9 +18,9 @@ name: Build for AppKit-E8 Hardware
 on:
   workflow_dispatch:
   pull_request:
-    branches: [main]
+    branches: [v3]
   push:
-    branches: [main]
+    branches: [v3]
 
 jobs:
   CI:
@@ -29,6 +29,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          ref: v3
 
       - name: Activate vcpkg
         uses: ARM-software/cmsis-actions/vcpkg@v1
@@ -49,6 +51,12 @@ jobs:
         with:
           key: ModelNova
           path: /home/runner/.cache/arm/packs/.Download
+
+      - name: Add Beta packs
+        working-directory: ./
+        run: |
+          cpackget add ./packs/PyTorch.ExecuTorch.1.1.0-rc1-build.12/PyTorch.ExecuTorch.pdsc --agree-embedded-license
+          cpackget add ./packs/AlifSemiconductor.Ensemble.2.2.0-dev8+g560eb47.pack --agree-embedded-license
 
       - name: Build the target-set
         working-directory: ./RockPaperScissors/AppKit-E8_USB
