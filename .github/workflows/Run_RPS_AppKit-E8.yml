@@ -50,14 +50,13 @@ jobs:
           path: ./RockPaperScissors/AppKit-E8_USB/out
 
       - name: Start the SDSIO server on the Raspberry Pi
-        working-directory: ./RockPaperScissors/AppKit-E8_USB
         run: |
-          if ! pgrep -f "sdsio-server.py --control SDS.sdsio.yml" > /dev/null; then
-              nohup python ~/../../SDS-Framework/utilities/sdsio-server.py --control SDS.sdsio.yml > ./sdsio-server.log 2>&1 &
+          if ! pgrep -f "sdsio-server.py --control ./RockPaperScissors/AppKit-E8_USBSDS.sdsio.yml" > /dev/null; then
+              nohup python ~/SDS-Framework/utilities/sdsio-server.py --control ./RockPaperScissors/AppKit-E8_USB/SDS.sdsio.yml > ./RockPaperScissors/AppKit-E8_USB/out/sdsio-server.log 2>&1 &
               sleep 2
           fi
-          pgrep -f "sdsio-server.py --control SDS.sdsio.yml"
-          tail -n 20 ./sdsio-server.log || true
+          pgrep -f "sdsio-server.py --control ./RockPaperScissors/AppKit-E8_USB/SDS.sdsio.yml"
+          tail -n 20 ./RockPaperScissors/AppKit-E8_USB/out/sdsio-server.log || true
 
       - name: Flash using pyOCD
         working-directory: ./RockPaperScissors/AppKit-E8_USB
@@ -71,7 +70,7 @@ jobs:
 
       - name: Stop the SDSIO server on the Raspberry Pi
         run: |
-          PIDS=$(pgrep -f "sdsio-server.py --control SDS.sdsio.yml") || true
+          PIDS=$(pgrep -f "sdsio-server.py --control ./RockPaperScissors/AppKit-E8_USB/SDS.sdsio.yml") || true
           if [ -n "$PIDS" ]; then
               echo "Stopping SDSIO server (PIDs: $PIDS)"
               kill $PIDS
@@ -82,4 +81,4 @@ jobs:
       - name: Show content of the sdsio-server.log file
         working-directory: ./RockPaperScissors/AppKit-E8_USB
         run: |        
-          cat ./sdsio-server.log
+          cat ./out/sdsio-server.log
