@@ -43,7 +43,7 @@ jobs:
         uses: dawidd6/action-download-artifact@v17
         with:
           workflow: Build_RPS_AppKit-E8.yml
-          name: Build for AppKit-E8 Hardware
+          name: RPS_AppKit-E8-U85_HIL_V3
           path: ./RockPaperScissors/AppKit-E8_USB/out
 
       - name: Flash and run using pyOCD
