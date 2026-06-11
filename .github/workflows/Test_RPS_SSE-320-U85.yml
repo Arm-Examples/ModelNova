@@ -18,9 +18,9 @@ name: Build and Run on FVP Simulation
 on:
   workflow_dispatch:
   pull_request:
-    branches: [v3]
+    branches: [main]
   push:
-    branches: [v3]
+    branches: [main]
 
 jobs:
   CI:
@@ -29,8 +29,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          ref: v3
 
       - name: Setup Python 3.13
         uses: actions/setup-python@v6
