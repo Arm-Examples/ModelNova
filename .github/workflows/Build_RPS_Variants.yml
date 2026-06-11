@@ -14,13 +14,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-name: Build
+name: Build RPS Context Variants
 on:
   workflow_dispatch:
   pull_request:
-    branches: [main]
+    branches: [v3]
   push:
-    branches: [main]
+    branches: [v3]
   # schedule:
   #   - cron: '00 20 * * 6'
 
@@ -31,25 +31,23 @@ jobs:
       matrix:
         context: [
           # toolchain,  example directory,                        project name,          build-type,              target-type,                 artifact name,
-          { tool: AC6,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: DebugPlay,   target-type: AppKit-E8-U85,  artf_name: AC6_DebugPlay_AppKit-E8-U85 },
-          { tool: AC6,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: DebugRec,    target-type: AppKit-E8-U85,  artf_name: AC6_DebugRec_AppKit-E8-U85 },
-          { tool: AC6,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: ReleasePlay, target-type: AppKit-E8-U85,  artf_name: AC6_ReleasePlay_AppKit-E8-U85 },
-          { tool: AC6,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: ReleaseRec,  target-type: AppKit-E8-U85,  artf_name: AC6_ReleaseRec_AppKit-E8-U85 },
-          # { tool: GCC,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: DebugPlay,   target-type: AppKit-E8-U85,  artf_name: GCC_DebugPlay_AppKit-E8-U85 },
-          # { tool: GCC,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: DebugRec,    target-type: AppKit-E8-U85,  artf_name: GCC_DebugRec_AppKit-E8-U85 },
-          # { tool: GCC,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: ReleasePlay, target-type: AppKit-E8-U85,  artf_name: GCC_ReleasePlay_AppKit-E8-U85 },
-          # { tool: GCC,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: ReleaseRec,  target-type: AppKit-E8-U85,  artf_name: GCC_ReleaseRec_AppKit-E8-U85 },
-          # { tool: IAR,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: DebugPlay,   target-type: AppKit-E8-U85,  artf_name: IAR_DebugPlay_AppKit-E8-U85 },
-          # { tool: IAR,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: DebugRec,    target-type: AppKit-E8-U85,  artf_name: IAR_DebugRec_AppKit-E8-U85 },
-          # { tool: IAR,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: ReleasePlay, target-type: AppKit-E8-U85,  artf_name: IAR_ReleasePlay_AppKit-E8-U85 },
-          # { tool: IAR,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: ReleaseRec,  target-type: AppKit-E8-U85,  artf_name: IAR_ReleaseRec_AppKit-E8-U85 }
-        ]
+          { tool: AC6,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: Debug,       target-type: AppKit-E8-U85,  artf_name: AC6_Debug_AppKit-E8-U85 },
+          { tool: AC6,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: Debug,       target-type: AppKit-E8-U85,  artf_name: AC6_Debug_AppKit-E8-U85 },
+          { tool: AC6,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: Release,     target-type: AppKit-E8-U85,  artf_name: AC6_Release_AppKit-E8-U85 },
+          { tool: AC6,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: Release,     target-type: AppKit-E8-U85,  artf_name: AC6_Release_AppKit-E8-U85 },
+          { tool: AC6,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: Debug,       target-type: SSE-320-U85,    artf_name: AC6_Debug_SSE-320-U85 },
+          { tool: AC6,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: Debug,       target-type: SSE-320-U85,    artf_name: AC6_Debug_SSE-320-U85 },
+          { tool: AC6,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: Release,     target-type: SSE-320-U85,    artf_name: AC6_Release_SSE-320-U85 },
+          { tool: AC6,  dir: ./RockPaperScissors/AppKit-E8_USB,   proj: AlgorithmTest,   build-type: Release,     target-type: SSE-320-U85,    artf_name: AC6_Release_SSE-320-U85 }
+          ]
 
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          ref: v3
 
       - name: Activate vcpkg
         uses: ARM-software/cmsis-actions/vcpkg@v1
@@ -70,6 +68,12 @@ jobs:
         with:
           key: ModelNova
           path: /home/runner/.cache/arm/packs/.Download
+
+      - name: Add Beta packs
+        working-directory: ./
+        run: |
+          cpackget add ./packs/PyTorch.ExecuTorch.1.1.0-rc1-build.12/PyTorch.ExecuTorch.pdsc --agree-embedded-license
+          cpackget add ./packs/AlifSemiconductor.Ensemble.2.2.0-dev8+g560eb47.pack --agree-embedded-license
 
       - name: ${{matrix.context.tool}} Build-Test for context ${{matrix.context.proj}}.${{matrix.context.build-type}}+${{matrix.context.target-type}}
         working-directory: ${{matrix.context.dir}}

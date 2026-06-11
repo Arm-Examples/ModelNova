@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-name: Build RPS for AppKit-E8 Hardware
+name: Build and Run RPS on Simulator
 on:
   workflow_dispatch:
   pull_request:
@@ -32,6 +32,14 @@ jobs:
         with:
           ref: v3
 
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install Python requirements
+        run: pip install -r requirements.txt
+      
       - name: Activate vcpkg
         uses: ARM-software/cmsis-actions/vcpkg@v1
         with:
@@ -61,11 +69,23 @@ jobs:
       - name: Build the target-set
         working-directory: ./RockPaperScissors/AppKit-E8_USB
         run: |
-          cbuild SDS.csolution.yml --active AppKit-E8-U85@HIL --packs
+          cbuild SDS.csolution.yml --active SSE-320-U85 --packs
+
+      - name: Run on FVP
+        working-directory: ./RockPaperScissors/AppKit-E8_USB
+        run: |
+          FVP_Corstone_SSE-320 -f ./Board/Corstone-320/fvp_config.txt -a ./out/AlgorithmTest/SSE-320-U85/Debug/AlgorithmTest.axf --simlimit 120 || true
+
+      - name: Print log file of the FVP VSI3 SDSIO service
+        working-directory: ./RockPaperScissors/AppKit-E8_USB
+        run: |
+          cat "./algorithm/SDS Recordings/sdsio.log"
 
       - name: Upload output of the built target-set
         uses: actions/upload-artifact@v7
         with:
-          name: RPS_AppKit-E8-U85_HIL_V3
+          name: RPS_SSE-320-U85_FVP
           path: |
             ./RockPaperScissors/AppKit-E8_USB/out
+            ./RockPaperScissors/AppKit-E8_USB/algorithm/SDS Recordings/*.p.sds
+            ./RockPaperScissors/AppKit-E8_USB/algorithm/SDS Recordings/sdsio.log
