@@ -60,6 +60,8 @@ jobs:
         working-directory: ./RockPaperScissors/AppKit-E8_USB
         run: |         
           sdsio-server -c SDS.sdsio.yml -p
+          # Stop sdsio-server
+          sdsio-server S
 
       - name: Show content of the sdsio-server.log file
         run: |        
