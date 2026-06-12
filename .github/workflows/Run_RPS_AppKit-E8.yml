@@ -22,9 +22,13 @@ on:
     types: [completed]
     branches: [main]
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   CI:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: [self-hosted, rsp-p5-01]
 
     steps:
@@ -32,6 +36,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: main
+          token: ${{ github.token }}
 
       - name: Download Build Artifact
         if: ${{ github.event_name == 'workflow_run' }}
