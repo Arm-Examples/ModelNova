@@ -61,16 +61,6 @@ jobs:
         run: |         
           sdsio-server -c SDS.sdsio.yml -p
 
-      - name: Stop the SDSIO server on the Raspberry Pi
-        run: |
-          PIDS=$(pgrep -f "sdsio-server.py usb") || true
-          if [ -n "$PIDS" ]; then
-              echo "Stopping SDSIO server (PIDs: $PIDS)"
-              kill $PIDS
-          else
-              echo "No SDSIO server running"
-          fi
-
       - name: Show content of the sdsio-server.log file
         run: |        
           cat ~/SDS-Framework/utilities/sdsio-server.log
