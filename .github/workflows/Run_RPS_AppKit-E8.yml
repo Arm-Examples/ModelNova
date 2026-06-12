@@ -50,7 +50,12 @@ jobs:
         working-directory: ./RockPaperScissors/AppKit-E8_USB/out
         run: |
           pyocd load --uid L96807771A --cbuild-run SDS+AppKit-E8-U85.cbuild-run.yml
-          pyocd run --uid L96807771A --cbuild-run SDS+AppKit-E8-U85.cbuild-run.yml -O reset_type=hardware --timelimit 10
+
+      - name: Flash and run using pyOCD
+        working-directory: ./RockPaperScissors/AppKit-E8_USB/out
+        run: |
+          pyocd run --uid L96807771A --cbuild-run SDS+AppKit-E8-U85.cbuild-run.yml --timelimit 10
+          sdsio-server -c SDS.sdsio.yml -p
 
       - name: Stop the SDSIO server on the Raspberry Pi
         run: |
