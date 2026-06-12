@@ -20,7 +20,7 @@ on:
   workflow_run:
     workflows: ["Build RPS for AppKit-E8 Hardware"]
     types: [completed]
-    branches: [v3]
+    branches: [main]
 
 jobs:
   CI:
@@ -31,14 +31,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          ref: v3
+          ref: main
 
       - name: Download Build Artifact
         if: ${{ github.event_name == 'workflow_run' }}
         uses: dawidd6/action-download-artifact@v17
         with:
           run_id: ${{ github.event.workflow_run.id }}
-          name: RPS_AppKit-E8-U85_HIL_V3
+          name: RPS_AppKit-E8-U85_HIL
           path: ./RockPaperScissors/AppKit-E8_USB/out
 
       - name: Download Build Artifact (manual dispatch fallback)
@@ -46,7 +46,7 @@ jobs:
         uses: dawidd6/action-download-artifact@v17
         with:
           workflow: Build_RPS_AppKit-E8.yml
-          name: RPS_AppKit-E8-U85_HIL_V3
+          name: RPS_AppKit-E8-U85_HIL
           path: ./RockPaperScissors/AppKit-E8_USB/out
 
       - name: Start the SDSIO server on the Raspberry Pi
@@ -66,7 +66,8 @@ jobs:
       - name: Run using pyOCD
         working-directory: ./RockPaperScissors/AppKit-E8_USB
         run: |
-          pyocd run --uid L96807771A --cbuild-run ./out/SDS+AppKit-E8-U85.cbuild-run.yml -O reset_type=hardware --timelimit 10
+          pyocd run --uid L96807771A --cbuild-run ./out/SDS+AppKit-E8-U85.cbuild-run.yml --timelimit 10
+          sdsio-server -c SDS.sdsio.yml -p
 
       - name: Stop the SDSIO server on the Raspberry Pi
         run: |
