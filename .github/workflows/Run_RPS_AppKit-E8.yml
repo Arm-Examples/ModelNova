@@ -66,8 +66,12 @@ jobs:
         run: |
           pkill pyocd
 
-      - name: Process diagnosis 3 a.o.
+      - name: Process diagnosis 3
         working-directory: ./RockPaperScissors/AppKit-E8_USB/out
         run: |
           ps -e
+
+      - name: Show content of the pyocd.out file
+        working-directory: ./RockPaperScissors/AppKit-E8_USB/out
+        run: |
           cat ./pyocd.out
