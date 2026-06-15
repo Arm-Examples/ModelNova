@@ -69,6 +69,6 @@ jobs:
           name: sds-artifacts
           path: |
             RockPaperScissors/AppKit-E8_USB/algorithm/SDS Recordings/
-            RockPaperScissors/AppKit-E8_USB/pyocd.out
+            RockPaperScissors/AppKit-E8_USB/out/pyocd.out
             RockPaperScissors/AppKit-E8_USB/out/SDS+AppKit-E8-U85.SVDat
           if-no-files-found: warn
