@@ -48,15 +48,28 @@ jobs:
           nohup pyocd run --uid L96807771A --cbuild-run SDS+AppKit-E8-U85.cbuild-run.yml > pyocd.out 2>&1 &
 
       - name: Process diagnosis 1
+        working-directory: ./RockPaperScissors/AppKit-E8_USB/out      
         run: |
           ps -e
+          cat ./pyocd.out
 
       - name: Start the SDSIO-Sever
         working-directory: ./RockPaperScissors/AppKit-E8_USB
         run: | 
           sdsio-server --control SDS.sdsio.yml --playback
+          # It is only for test. The SDSIO-Sever will be terminated manually on the Raspberry Pi
+          continue-on-error: true
 
       - name: Process diagnosis 2
         run: |
           ps -e
 
+      - name: Kill the pyocd process
+        run: |
+          pkill pyocd
+
+      - name: Process diagnosis 3 a.o.
+        working-directory: ./RockPaperScissors/AppKit-E8_USB/out
+        run: |
+          ps -e
+          cat ./pyocd.out
