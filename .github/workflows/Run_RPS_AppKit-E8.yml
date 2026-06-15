@@ -27,15 +27,6 @@ jobs:
     runs-on: [self-hosted, rsp-p5-01]
 
     steps:
-      - name: Start the SDSIO server on the Raspberry Pi
-        run: |
-          if ! pgrep -f "sdsio-server.py usb" > /dev/null; then
-              nohup python ~/SDS-Framework/utilities/sdsio-server.py usb > ~/SDS-Framework/utilities/sdsio-server.log 2>&1 &
-              sleep 2
-          fi
-          pgrep -f "sdsio-server.py usb"
-          tail -n 20 ~/SDS-Framework/utilities/sdsio-server.log || true
-
       - name: Checkout repository
         uses: actions/checkout@v6
 
@@ -54,15 +45,18 @@ jobs:
       - name: Run using pyOCD
         working-directory: ./RockPaperScissors/AppKit-E8_USB/out
         run: |
-          pyocd run --uid L96807771A --cbuild-run SDS+AppKit-E8-U85.cbuild-run.yml --timelimit 10
+          nohup pyocd run --uid L96807771A --cbuild-run SDS+AppKit-E8-U85.cbuild-run.yml > pyocd.out 2>&1 &
+
+      - name: Process diagnosis 1
+        run: |
+          ps -e
 
       - name: Start the SDSIO-Sever
         working-directory: ./RockPaperScissors/AppKit-E8_USB
-        run: |         
-          sdsio-server -c SDS.sdsio.yml -p
-          # Stop sdsio-server
-          sdsio-server S
+        run: | 
+          sdsio-server --control SDS.sdsio.yml --playback
 
-      - name: Show content of the sdsio-server.log file
-        run: |        
-          cat ~/SDS-Framework/utilities/sdsio-server.log
+      - name: Process diagnosis 2
+        run: |
+          ps -e
+
