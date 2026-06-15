@@ -45,16 +45,18 @@ jobs:
       - name: Run using pyOCD
         working-directory: ./RockPaperScissors/AppKit-E8_USB/out
         run: |
-          nohup pyocd run --uid L96807771A --cbuild-run SDS+AppKit-E8-U85.cbuild-run.yml > pyocd.out 2>&1 &
+          nohup pyocd run --uid L96807771A --cbuild-run SDS+AppKit-E8-U85.cbuild-run.yml --timelimit 100 --eot > pyocd.out 2>&1 &
 
       - name: Start the SDSIO-Sever
         working-directory: ./RockPaperScissors/AppKit-E8_USB
         run: | 
           sdsio-server --control SDS.sdsio.yml --playback --exit-after-playback --no-progress-info
 
-      - name: Kill the pyocd process
+      - name: Wait for pyocd to terminate
         run: |
-          pkill pyocd
+          while pgrep pyocd > /dev/null; do
+            sleep 1
+          done
 
       - name: Show content of the pyocd.out file
         working-directory: ./RockPaperScissors/AppKit-E8_USB/out
