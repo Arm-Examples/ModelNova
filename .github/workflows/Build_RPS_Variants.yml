@@ -18,9 +18,9 @@ name: Build RPS Context Variants
 on:
   workflow_dispatch:
   pull_request:
-    branches: [v3]
+    branches: [main]
   push:
-    branches: [v3]
+    branches: [main]
   # schedule:
   #   - cron: '00 20 * * 6'
 
@@ -46,8 +46,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          ref: v3
 
       - name: Activate vcpkg
         uses: ARM-software/cmsis-actions/vcpkg@v1

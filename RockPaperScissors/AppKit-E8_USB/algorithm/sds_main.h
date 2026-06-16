@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Arm Limited. All rights reserved.
+ * Copyright (c) 2025-2026 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,18 +21,23 @@
 
 #include <stdint.h>
 #include "cmsis_compiler.h"
-#include "sds_rec_play.h"
 
 #ifdef  __cplusplus
 extern "C"
 {
 #endif
 
-#ifdef SDS_PLAY
-// SDS identifiers
-extern sdsRecPlayId_t playIdDataInput;
-#endif
+// SDS system state consistent with main AlgorithmThread loop
+extern uint32_t sds_state;
 
+// Timeslot information
+extern uint32_t timeslot;
+
+// Flag indicating whether images captured by camera are being recorded
+extern uint8_t record_camera;
+
+// SDS stream identifier for recording images captured by camera
+extern sdsId_t sds_camera_id;
 
 /**
   \fn           int32_t OpenStreams (void)

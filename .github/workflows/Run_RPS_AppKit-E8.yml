@@ -28,7 +28,7 @@ permissions:
 
 jobs:
   CI:
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success') }}
     runs-on: [self-hosted, rsp-p5-01]
 
     steps:
@@ -46,45 +46,40 @@ jobs:
           name: RPS_AppKit-E8-U85_HIL
           path: ./RockPaperScissors/AppKit-E8_USB/out
 
-      - name: Download Build Artifact (manual dispatch fallback)
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        uses: dawidd6/action-download-artifact@v17
-        with:
-          workflow: Build_RPS_AppKit-E8.yml
-          name: RPS_AppKit-E8-U85_HIL
-          path: ./RockPaperScissors/AppKit-E8_USB/out
-
-      - name: Start the SDSIO server on the Raspberry Pi
-        run: |
-          if ! pgrep -f "sdsio-server.py --control ./RockPaperScissors/AppKit-E8_USBSDS.sdsio.yml" > /dev/null; then
-              nohup python ~/SDS-Framework/utilities/sdsio-server.py --control ./RockPaperScissors/AppKit-E8_USB/SDS.sdsio.yml > ./RockPaperScissors/AppKit-E8_USB/out/sdsio-server.log 2>&1 &
-              sleep 2
-          fi
-          pgrep -f "sdsio-server.py --control ./RockPaperScissors/AppKit-E8_USB/SDS.sdsio.yml"
-          tail -n 20 ./RockPaperScissors/AppKit-E8_USB/out/sdsio-server.log || true
-
       - name: Flash using pyOCD
-        working-directory: ./RockPaperScissors/AppKit-E8_USB
+        working-directory: ./RockPaperScissors/AppKit-E8_USB/out
         run: |
-          pyocd load --uid L96807771A --cbuild-run ./out/SDS+AppKit-E8-U85.cbuild-run.yml
+          pyocd load --uid L96807771A --cbuild-run SDS+AppKit-E8-U85.cbuild-run.yml
 
       - name: Run using pyOCD
-        working-directory: ./RockPaperScissors/AppKit-E8_USB
+        working-directory: ./RockPaperScissors/AppKit-E8_USB/out
         run: |
-          pyocd run --uid L96807771A --cbuild-run ./out/SDS+AppKit-E8-U85.cbuild-run.yml --timelimit 10
-          sdsio-server -c SDS.sdsio.yml -p
+          nohup pyocd run --uid L96807771A --cbuild-run SDS+AppKit-E8-U85.cbuild-run.yml --timelimit 30 --eot > pyocd.out 2>&1 &
 
-      - name: Stop the SDSIO server on the Raspberry Pi
+      - name: Start the SDSIO server on the Raspberry Pi
+        working-directory: ./RockPaperScissors/AppKit-E8_USB      
         run: |
-          PIDS=$(pgrep -f "sdsio-server.py --control ./RockPaperScissors/AppKit-E8_USB/SDS.sdsio.yml") || true
-          if [ -n "$PIDS" ]; then
-              echo "Stopping SDSIO server (PIDs: $PIDS)"
-              kill $PIDS
-          else
-              echo "No SDSIO server running"
-          fi
+          sleep 2 # Delay to ensure that pyOCD is started
+          sdsio-server --control SDS.sdsio.yml --playback --exit-after-playback --no-progress-info | tee sdsio-server.log
 
-      - name: Show content of the sdsio-server.log file
-        working-directory: ./RockPaperScissors/AppKit-E8_USB
-        run: |        
-          cat ./out/sdsio-server.log
+      - name: Wait for pyocd to complete
+        run: |
+          while pgrep pyocd > /dev/null; do
+            sleep 1
+          done
+
+      - name: Show content of the pyocd.out file
+        working-directory: ./RockPaperScissors/AppKit-E8_USB/out
+        run: |
+          cat ./pyocd.out
+
+      - name: Upload SDS artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: sds-artifacts
+          path: |
+            RockPaperScissors/AppKit-E8_USB/algorithm/SDS Recordings/*.p.sds
+            RockPaperScissors/AppKit-E8_USB/out/pyocd.out
+            RockPaperScissors/AppKit-E8_USB/out/SDS+AppKit-E8-U85.SVDat
+            RockPaperScissors/AppKit-E8_USB/sdsio-server.log
+          if-no-files-found: warn

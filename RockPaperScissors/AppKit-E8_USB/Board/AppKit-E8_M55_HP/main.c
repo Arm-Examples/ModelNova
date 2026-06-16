@@ -139,8 +139,10 @@ int main(void)
     /* Enable the CPU Cache */
     CpuCacheEnable();
 
-    /* Initialize ET PAL*/
+#if ENABLE_TIME_PROFILING
+    /* Initialize ET PAL */
     profiler_init();
+#endif
 
     return app_main();
 }

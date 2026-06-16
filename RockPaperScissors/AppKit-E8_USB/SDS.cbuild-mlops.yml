@@ -1,0 +1,28 @@
+cbuild-mlops:
+  generated-by: csolution version 2.14.1+p9-g859cb6c9
+  description: ML model for detecting Rock/Paper/Scissors images
+  processor:
+    type: Cortex-M55
+  npu:
+    type: Ethos-U85
+    macs: 256
+  vela:
+    ini: .cmsis/ensemble_vela.ini
+    options: --accelerator-config ethos-u85-256 --system-config RTSS_HE_SRAM_MRAM --memory-mode Shared_Sram
+  model:
+    clayer: ai_layer/ai_layer.clayer.yml
+    name: RPS
+  hardware:
+    active: AppKit-E8-U85@HIL
+    cbuild-run: out/SDS+AppKit-E8-U85.cbuild-run.yml
+    output:
+      - file: out/AlgorithmTest/AppKit-E8-U85/Debug/AlgorithmTest.axf
+        type: elf
+  simulator:
+    active: SSE-320-U85
+    cbuild-run: out/SDS+SSE-320-U85.cbuild-run.yml
+    output:
+      - file: out/AlgorithmTest/SSE-320-U85/Debug/AlgorithmTest.axf
+        type: elf
+    model: FVP_Corstone_SSE-320
+    config-file: Board/Corstone-320/fvp_config.txt

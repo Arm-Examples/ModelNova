@@ -10,12 +10,12 @@ To run this example:
 
 - Install [Keil Studio for VS Code](https://marketplace.visualstudio.com/items?itemName=Arm.keil-studio-pack) and run a
   Blinky example on the board to verify tool installation.
-- Install SDS-Framework pack v2.1.0 or later from:
+- Install SDS-Framework pack v3.0.0 or later from:
     - `https://github.com/ARM-software/SDS-Framework/releases`
 - Setup the [Python environment](https://arm-software.github.io/SDS-Framework/main/utilities.html#setup) for running
   the SDS Utilities.
-- Install Alif Ensemble CMSIS DFP pack v2.1.0 or later with:
-    - `cpackget add AlifSemiconductor::Ensemble@2.1.0`
+- Install Alif Ensemble CMSIS DFP pack v2.2.0 or later with:
+    - `cpackget add AlifSemiconductor::Ensemble@2.2.0`
 
 ## Alif AppKit-E8-AIML
 
@@ -42,21 +42,17 @@ verifies a user algorithm with recording and playback of SDS data files.
 ## Layer Type: Board and Layer Type: SDSIO
 
 The board layer implements the Hardware Abstraction Layer (HAL).
-The SDSIO layer implements the communication layer that communicates with SDSIO-Server.
+The SDSIO layer implements the communication layer that communicates with SDSIO Server.
 
 - `Board/AppKit-E8_M55_HP/Board_HP.clayer.yml` provides board/device drivers
 - `sdsio/usb/sdsio_usb.clayer.yml` provides the **USB Interface** for SDS I/O communication interface
 
 ## Build Types
 
-- **`DebugRec`**: Debug version of application used for recording of generated input data and results of simple
-  checksum algorithm output data.
-- **`DebugPlay`**: Debug version of application used for verification of SDS component, play back the previously
-  recorded SDS file and verify results of simple checksum algorithm.
-- **`ReleaseRec`**: Release version of application used for recording of generated input data and results of simple
-  checksum algorithm output data.
-- **`ReleasePlay`**: Release version of application used for verification of SDS component, play back the previously
-  recorded SDS file and verify results of simple checksum algorithm.
+- **`Debug`**: Debug version of application used for recording of ML algorithm input data (image 224 x 224) and results of ML algorithm,
+  or playback of previously recorder ML algorithm input data and recording of results of ML algorithm.
+- **`Release`**: Release version of application used for recording of ML algorithm input data (image 224 x 224) and results of ML algorithm,
+  or playback of previously recorder ML algorithm input data and recording of results of ML algorithm.
 
 > Note:
 >
@@ -66,13 +62,16 @@ The SDSIO layer implements the communication layer that communicates with SDSIO-
 
 The AlgorithmTest project demonstrates real-world usage of the SDS Framework on an object detection ML model.
 
-This project, when configured as **Recorder**:
+This project supports both recording and playback functionality. By default, the application starts in recording mode.
+You can switch modes via the SDSIO Server: use `R` key to start recording, `S` key to stop recording, and `P` key to begin playback.
+
+When used in **recording** mode:
 
 - **Captures on-board camera stream** via SDS recording stream (ML_In.<n>.sds file)
 - **Executes ML inference** using an object detection ML model
 - **Captures algorithm output** via SDS recording stream (ML_Out.<n>.sds file)
 
-Alternatively, when configured as **Player**:
+When used in **playback** mode:
 
 - **Replays pre-recorded video stream** via SDS playback stream (ML_In.<n>.sds file)
 - **Executes ML inference** using an object detection ML model
@@ -80,144 +79,139 @@ Alternatively, when configured as **Player**:
 
 ### Setup
 
-Begin by starting the [SDSIO-Server](https://arm-software.github.io/SDS-Framework/main/utilities.html#sdsio-server):
+Begin by starting the [SDSIO Server](https://arm-software.github.io/SDS-Framework/main/utilities.html#sdsio-server):
 
 - Open Terminal and type `sdsio-server.py usb`.
-- Check [SDS Utilities](https://arm-software.github.io/SDS-Framework/main/utilities.html) configuration if SDSIO-Server
+- Check [SDS Utilities](https://arm-software.github.io/SDS-Framework/main/utilities.html) configuration if SDSIO Server
   is not found.
 
-**SDSIO-Server Output:**
+**SDSIO Server Output:**
 
 ```bash
 >sdsio-server.py usb
 Press Ctrl+C to exit.
+Starting SDS Control Flags thread. R=record, P=playback, S/s=stop, X/x=terminate, A-H=set flags 0-7, a-h=clear flags 0-7.
 Starting USB Server...
 Waiting for SDSIO Client USB device...
 ```
 
 In VS Code, open the **CMSIS** view to build and run the project using the following steps:
 
-1. Use **Manage Solution Settings** and select as Active Project **AlgorithmTest** with Build Type **DebugRec**.
-2. **Build solution** creates the executable image.
-3. Connect the PRG USB (J3) of the AppKit-E8-AIML and configure SW4 switch for SETOOLS (SE position).
-4. If not already done, download debug stubs using
-   `"Alif: Install M55_HE or M55_HP debug stubs (single core configuration)"` task.
-5. **Load application to target** to download the application to the board.
-6. Configure SW4 for UART4 (U4 position) and use the VS Code **Serial Monitor** to observe the application output
-   (STDIO).
-7. Connect the MCU USB (J2) of the AppKit-E8-AIML to the PC running the SDSIO-Server.
-8. Reset the board with RESET (SW1) button and observe the application output (STDIO) like below
+1. **Build solution** to generate the executable image.
+2. Connect the **PRG USB (J3)** of the **AppKit-E8-AIML** and configure **SW4** switch for **SETOOLS** (SE position).
+3. If not already done, download debug stubs using the task:
+   `"Alif: Install M55_HE or M55_HP debug stubs (single core configuration)"`.
+4. **Load application to target** to download the application to the board.
+5. Configure **SW4** for **UART4** (U4 position) and use the VS Code **Serial Monitor** to view the application output (STDIO).
+6. Connect the **MCU USB (J2)** of the **AppKit-E8-AIML** to the **PC** running the **SDSIO Server**.
+7. Reset the board with **RESET (SW1)** button and observe the application output (STDIO) like below
 
 ```txt
-Connection to SDSIO-Server established via USB interface
+SDS I/O USB interface initialized successfully
+Model buffer loaded, has 1 methods
+Running method forward
+Setup Method allocator pool. Size: 1048576 bytes.
+Setting up planned buffer 0, size 752640
+Method 'forward' loaded.
+Model initialized. Ready for inference.
+35% idle
+40% idle
  :
-12% idle
-No object detected
-```
-
-Alternatively, if SDSIO-Server is not reachable or not running you will see the output:
-
-```txt
-SDS I/O USB interface initialization failed or 'sdsio-server usb' unavailable!
-Ensure that SDSIO-Server is running, then restart the application!
 ```
 
 ### Recording Test
 
 To execute the **recording** test, just:
 
-1. Press the joystick (SW2) on the board to start recording.
-2. Press the joystick (SW2) again to stop recording.
+1. Press the **joystick (SW2)** on the board or press `R` key in the SDSIO Server window to start the recording.
+2. Press the **joystick (SW2)** again or press `S` key in the SDSIO Server window to stop the recording.
 
-**SDSIO-Server Output:**
+**SDSIO Server Output:**
 
 ```bash
 >sdsio-server.py usb
 Press Ctrl+C to exit.
+Starting SDS Control Flags thread. R=record, P=playback, S/s=stop, X/x=terminate, A-H=set flags 0-7, a-h=clear flags 0-7.
 Starting USB Server...
-Waiting for SDSIO Client USB device...
-DSIO Client USB device connected.
-Ping received.
-Record:   ML_In (.\ML_In.0.sds).
-Record:   ML_Out (.\ML_Out.0.sds).
+SDSIO Client USB device connected.
+sdsFlags = 0x10000000
+40% idle
+ :
+Record:   ML_In (c:\SDS\ML_In.0.sds)
+Record:   ML_Out (c:\SDS\ML_Out.0.sds)
 ..............
-Closed:   ML_In (.\ML_In.0.sds).
-Closed:   ML_Out (.\ML_Out.0.sds).
+sdsFlags = 0x10000000
+.
+Closed:   ML_In (c:\SDS\ML_In.0.sds)
+Closed:   ML_Out (c:\SDS\ML_Out.0.sds)
 ```
 
 **Serial Monitor Output:**
 
 ```txt
-SDS recording (#0) started
+==== SDS recording started
 Post-processed output:
 Predicted class : UNKNOWN
 Confidence      : 99.51 %
 40% idle
 ...
-SDS recording (#0) stopped
-====
+==== SDS recording stopped
 ```
-Each run records two files: `ML_In.<n>.sds` and `ML_Out.<n>.sds` in the directory where SDSIO-Server was started. `<n>` is a sequential number.
+Each run records two files: `ML_In.<n>.sds` and `ML_Out.<n>.sds` in the directory where SDSIO Server was started. `<n>` is a sequential number.
 
 #### Check SDS Files
 
-The [SDS-Check](https://arm-software.github.io/SDS-Framework/main/utilities.html#sds-check)
+The [SDS Check](https://arm-software.github.io/SDS-Framework/main/utilities.html#sds-check)
 utility verifies SDS files for consistency. For example:
 
 ```bash
 >sds-check.py -s ML_In.0.sds
 File Name         : ML_In.0.sds
-File Size         : 1.505.360 bytes
-Number of Records : 10
-Recording Time    : 1.800 ms
-Recording Interval: 200 ms
-Data Size         : 1.505.280 bytes
+File Size         : 8.580.552 bytes
+Number of Records : 57
+Recording Time    : 7 s
+Recording Interval: 120 ms
+Data Size         : 8.580.096 bytes
 Data Block        : 150.528 bytes
-Data Rate         : 752.640 byte/s
+Data Rate         : 1.254.400 byte/s
 Jitter            : Not detected
 Validation passed
 ```
 
 ### Playback Test
 
-To execute the **playback** test, follow the steps below:
+To execute the **playback** test, just:
 
-1. Use **Manage Solution Settings** and select as Active Project **AlgorithmTest** with Build Type **DebugPlay**.
-2. **Build solution** creates the executable image.
-3. Connect the PRG USB (J3) of the AppKit-E8-AIML and configure SW4 switch for SETOOLS (SE position).
-4. If not already done, download debug stubs using
-   `"Alif: Install M55_HE or M55_HP debug stubs (single core configuration)"` task.
-5. **Load application to target** to download the application to the board.
-6. Configure SW4 for UART4 (U4 position) and use the VS Code **Serial Monitor** to observe the application output
-   (STDIO).
-7. Connect the MCU USB (J2) of the AppKit-E8-AIML to the PC running SDSIO-Server.
-8. Reset the board with RESET (SW1) button and observe the application output (STDIO).
-9.  Press the joystick (SW2) on the board to start playback of `ML_In` and recording of `ML_Out`.
-10. Wait for playback to finish; it will finish automatically when all data from `ML_In.0.sds` SDS file was played back.
+1. Press the `P` key in the SDSIO Server window to start the playback.
+2. Press the `S` key in the SDSIO Server window to stop the playback.
 
-The stream `ML_In.<n>.sds` is read back and the algorithm processes this data. The stream `ML_Out.<m>.sds` is
-written whereby `<m>` is the next available file index.
+The stream `ML_In.<n>.sds` is read back and the algorithm processes this data. The stream `ML_Out.<n>.p.sds` is written.
 
 > Note:
 >
 > The playback implementation replays recordings as quickly as possible and does not
-> account for timestamp data. During playback, the ML system receives the same recorded
+> account for time slot information. During playback, the ML system receives the same recorded
 > input data, so timing information is not relevant in this context.
 
 **SDSIO-Server Output:**
 
 ```bash
 >sdsio-server.py usb
-Press Ctrl+C to exit.
-Starting USB Server...
-Waiting for SDSIO Client USB device...
-DSIO Client USB device connected.
-Ping received.
-Playback: ML_In (.\ML_In.0.sds).
-Record:   ML_Out (.\ML_Out.0.sds).
-......
-Closed:   ML_In (.\ML_In.0.sds).
-Closed:   ML_Out (.\ML_Out.0.sds).
+sdsControl: start playback ('P')
+sdsFlags = 0xB0000000
+Playback: ML_In (c:\SDS\ML_In.0.sds)
+Record:   ML_Out (c:\SDS\ML_Out.0.p.sds)
+Closed:   ML_In (c:\SDS\ML_In.0.sds)
+.
+55% idle
+...
+13% idle
+....
+11% idle
+.....
+Closed:   ML_Out (c:\SDS\ML_Out.0.p.sds)
+sdsFlags = 0x30000000
+57% idle
 ```
 
 > Note:
@@ -226,18 +220,15 @@ Closed:   ML_Out (.\ML_Out.0.sds).
 
 ### Key Components
 
-**Video Frame Capture** (`sds_data_in_user.c`):
+**Video Frame Capture** (`data_in_user.c`):
 
 - Initializes on-board camera input stream using CMSIS vStream driver
-- Captures video frames and processes frames for ML model input
+- Captures video frames and pre-processes them for use as input to the ML model
 - Provides frame data for SDS recording
 
-**Algorithm Processing** (`sds_algorithm_user.cpp`):
+**Algorithm Processing** (`algorithm_user.cpp`):
 
 - Initializes ML model and LCD display stream using CMSIS vStream driver
 - Executes ML inference (pre-processing, inference, post-processing)
 - Copies detection results to output buffer for SDS recording
-- Displays frames on LCD with overlaid boxes using CMSIS vStream driver
-
-One can use the **AlgorithmTest** project in the same way as **DataTest**. In VS Code, open
-CMSIS view and use **Manage Solution Settings** to select **AlgorithmTest** as Active Project.
+- Displays frames on LCD with object type with confidence percentage

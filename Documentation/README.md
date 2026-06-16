@@ -38,6 +38,8 @@ run_inference<br/>▼           |  Project       | Source file `arm_executor_run
 execute<br/>▼                 | Layer AI       | Executes the ML model (the `execute` method is part of ExecuTorch).
 postprocess                   |  Project       | Source file `sds_algorithm_user.cpp` calls `postprocess()` to print the results.
 
+## Target Hardware
+
 The project runs on the [Alif AppKit-E8-AIML](https://www.keil.arm.com/boards/alif-semiconductor-appkit-e8-aiml-a-b437af7/features/).
 
 - The USB SoC interface connects to the [SDSIO-Server](https://arm-software.github.io/SDS-Framework/main/utilities.html#sdsio-server) and is used to record and play back SDS files.
@@ -106,7 +108,6 @@ The dataset is automatically divided into:
 - Training dataset
 - Validation dataset
 
-
 ### Pick a Model
 
 In the **Pick a Model** tab, users select a base model from the **ModelNova Cloud Model Registry**.
@@ -157,7 +158,6 @@ For ALIF devices, the model must be optimized for:
 - **Ethos-U NPU acceleration**
 
 This ensures efficient execution on low-power embedded devices.
-
 
 ### View Training Report
 

@@ -1,0 +1,28 @@
+sdsio:
+  interface:
+    usb:
+  workdir: ./algorithm/SDS Recordings
+  metadir: ./algorithm/SDS Recordings
+
+  # Data stream information used by VS Code extension
+  streams:
+    - name: Camera
+      view: video
+    - name: ML_In
+      view: video
+    - name: ML_Out
+      view: signal
+  
+  # Human readable labels for sdsFlag bits use by VS Code extension
+  flag-info:
+    - 0: Record Camera
+
+  # Defines a playback test sequence
+  play:
+    - step: "Test 0: ML_In.0.sds"
+      labels: [ 0 ]
+    - step: "Test 1: ML_In.rock.1.sds + ML_In.rock.2.sds + ML_In.rock.3.sds"
+      labels: 
+        - rock.1
+        - rock.2
+        - rock.3

@@ -1,9 +1,11 @@
-# SDS Interface - USB
+# SDS with SDSIO via USB
 
-This SDS Interface uses the USB Device (Custom Class) communication implemented with the MDK-Middleware USB component.
+This layer provides SDS with SDSIO using the USB communication.
+It is implemented with the MDK-Middleware USB component.
 It is based on the following components:
 
-- [SDS Recorder and Player](https://arm-software.github.io/SDS-Framework/main/SDS_API/group__SDS__Recorder__Player.html) data streaming,
+- [SDS](https://arm-software.github.io/SDS-Framework/main/SDS_API/group__SDS__Stream__Interface.html) data streaming,
+- [SDSIO](https://arm-software.github.io/SDS-Framework/main/SDS_API/group__SDSIO__Interface.html) SDSIO interface,
 - [MDK-Middleware USB](https://arm-software.github.io/MDK-Middleware/latest/USB/USB_Device.html) communication stack,
 - [CMSIS-Driver USB Device](https://arm-software.github.io/CMSIS_6/latest/Driver/group__usbd__interface__gr.html) physical interface.
 
@@ -12,9 +14,8 @@ It is based on the following components:
 The following SDS software components are required:
 
 ```yml
-  - component: SDS:Buffer
+  - component: SDS:Stream&CMSIS-RTOS2
   - component: SDS:IO:USB&MDK USB
-  - component: SDS:RecPlay&CMSIS-RTOS2
 ```
 
 ## USB Configuration
@@ -27,16 +28,20 @@ The following MDK-Middleware USB software components are required:
   - component: USB&MDK:Device:Custom Class
 ```
 
-## Starting SDSIO Server
+### USB Vendor ID and Product ID
 
-The **SDSIO Server** is a Python-based utility for PC, which is included in the
-[SDS-Framework](https://github.com/ARM-software/SDS-Framework/tree/main/utilities) pack.
+The default `USBD_Config_0.h` contains placeholder Vendor ID (VID) and Product ID (PID) values:
 
-To start the SDSIO Server, run it from the `./utilities` directory with:
-
-```txt
-python sdsio-server.py usb
+```c
+#define USBD0_DEV_DESC_IDVENDOR         0xC251   // replace with your own VID
+#define USBD0_DEV_DESC_IDPRODUCT        0x8007   // replace with your own PID
 ```
 
-Further information about the SDSIO Server application can be found in the
-[SDS-Framework documentation](https://github.com/ARM-software/SDS-Framework/tree/main/documentation/utilities.md#sdsio-server).
+The Vendor ID **0xC251 (Keil)** and Product ID **0x8007** can be used for internal testing environments with limited access.
+For production, the Vendor ID (VID) and Product ID (PID) should be vendor-specific.
+The Vendor ID must be assigned by the [USB Implementers Forum (USB-IF)](https://www.usb.org/) following the procedure for
+[Getting a Vendor ID](https://www.usb.org/getting-vendor-id).
+
+## Usage
+
+For more information refer to [Using USB Interface](https://arm-software.github.io/SDS-Framework/main/sdsio.html#layer-sdsio_usb).

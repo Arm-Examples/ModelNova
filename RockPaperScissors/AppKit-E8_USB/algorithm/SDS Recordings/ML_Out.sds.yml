@@ -1,0 +1,13 @@
+sds:
+  name: ML output
+  description: ML classification results
+  frequency: 8.33
+  content:
+  - value: PAPER
+    type:  float
+  - value: ROCK
+    type:  float
+  - value: SCISSORS
+    type:  float
+  - value: UNKNOWN
+    type:  float

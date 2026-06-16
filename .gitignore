@@ -85,3 +85,10 @@ uv2csolution.log
 
 # legacy intermediate project file
 *.cprj
+
+# Python Cache
+**/__pycache__/**
+
+# SDS Playback Recordings and FVP Log files
+**/*.p.sds
+**/sdsio.log
