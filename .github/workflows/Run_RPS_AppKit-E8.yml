@@ -24,6 +24,13 @@ on:
 
 jobs:
   CI:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'v3'
+      )  
+
     runs-on: [self-hosted, rsp-p5-01]
 
     steps:
@@ -34,7 +41,7 @@ jobs:
         uses: dawidd6/action-download-artifact@v17
         with:
           workflow: Build_RPS_AppKit-E8.yml
-          name: RPS_AppKit-E8-U85_HIL_V3
+          name: RPS_AppKit-E8-U85_HIL
           path: ./RockPaperScissors/AppKit-E8_USB/out
 
       - name: Flash and run using pyOCD
