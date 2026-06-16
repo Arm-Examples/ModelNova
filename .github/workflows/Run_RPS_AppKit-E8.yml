@@ -17,8 +17,15 @@
 name: Run on AppKit-E8 Hardware
 on:
   workflow_dispatch:
+  
+  workflow_run:
+    workflows: ["Build for AppKit-E8 Hardware"]
+    types: [completed]
+    branches: [v3]
+
   pull_request:
     branches: [v3]
+
   push:
     branches: [v3]
 
@@ -40,7 +47,7 @@ jobs:
       - name: Download Build Artifact
         uses: dawidd6/action-download-artifact@v17
         with:
-          workflow: Build_RPS_AppKit-E8.yml
+          run_id: ${{ github.event.workflow_run.id }}
           name: RPS_AppKit-E8-U85_HIL
           path: ./RockPaperScissors/AppKit-E8_USB/out
 
