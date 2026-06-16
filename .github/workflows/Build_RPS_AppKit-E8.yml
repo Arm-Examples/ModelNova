@@ -29,8 +29,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          ref: v3
 
       - name: Activate vcpkg
         uses: ARM-software/cmsis-actions/vcpkg@v1
