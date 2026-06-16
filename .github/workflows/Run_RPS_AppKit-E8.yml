@@ -46,7 +46,7 @@ jobs:
         working-directory: ./RockPaperScissors/AppKit-E8_USB/out
         run: |
           nohup pyocd run --uid L96807771A --cbuild-run SDS+AppKit-E8-U85.cbuild-run.yml --timelimit 100 --eot > pyocd.out 2>&1 &
-          sleep 0.5 # 500 ms
+          sleep 3
 
       - name: Start the SDSIO-Sever
         working-directory: ./RockPaperScissors/AppKit-E8_USB
