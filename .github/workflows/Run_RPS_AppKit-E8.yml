@@ -45,15 +45,15 @@ jobs:
       - name: Run using pyOCD
         working-directory: ./RockPaperScissors/AppKit-E8_USB/out
         run: |
-          nohup pyocd run --uid L96807771A --cbuild-run SDS+AppKit-E8-U85.cbuild-run.yml --timelimit 100 --eot > pyocd.out 2>&1 &
-          sleep 1.5
+          nohup pyocd run --uid L96807771A --cbuild-run SDS+AppKit-E8-U85.cbuild-run.yml --timelimit 30 --eot > pyocd.out 2>&1 &
 
       - name: Start the SDSIO-Sever
         working-directory: ./RockPaperScissors/AppKit-E8_USB
         run: | 
-          sdsio-server --control SDS.sdsio.yml --playback --exit-after-playback --no-progress-info
+          sleep 2 # Delay to ensure that pyOCD is started
+          sdsio-server --control SDS.sdsio.yml --playback --exit-after-playback --no-progress-info | tee sdsio-server.log
 
-      - name: Wait for pyocd to terminate
+      - name: Wait for pyocd to complete
         run: |
           while pgrep pyocd > /dev/null; do
             sleep 1
@@ -69,7 +69,8 @@ jobs:
         with:
           name: sds-artifacts
           path: |
-            RockPaperScissors/AppKit-E8_USB/algorithm/SDS Recordings/
+            RockPaperScissors/AppKit-E8_USB/algorithm/SDS Recordings/*.p.sds
             RockPaperScissors/AppKit-E8_USB/out/pyocd.out
             RockPaperScissors/AppKit-E8_USB/out/SDS+AppKit-E8-U85.SVDat
+            RockPaperScissors/AppKit-E8_USB/sdsio-server.log
           if-no-files-found: warn
