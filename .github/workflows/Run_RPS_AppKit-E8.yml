@@ -23,12 +23,6 @@ on:
     types: [completed]
     branches: [v3]
 
-  pull_request:
-    branches: [v3]
-
-  push:
-    branches: [v3]
-
 jobs:
   CI:
     if: >
