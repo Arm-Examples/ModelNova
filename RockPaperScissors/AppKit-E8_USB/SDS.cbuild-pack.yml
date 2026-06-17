@@ -3,10 +3,14 @@ cbuild-pack:
     - resolved-pack: ARM::CMSIS@6.3.0
       selected-by-pack:
         - ARM::CMSIS
+        - ARM::CMSIS@^6.2.0
         - ARM::CMSIS@^6.3.0
     - resolved-pack: ARM::CMSIS-Compiler@2.1.0
       selected-by-pack:
         - ARM::CMSIS-Compiler@^2.1.0
+    - resolved-pack: ARM::CMSIS-Driver@2.10.0
+      selected-by-pack:
+        - ARM::CMSIS-Driver@^2.10.0
     - resolved-pack: ARM::CMSIS-NN@7.0.0
       selected-by-pack:
         - ARM::CMSIS-NN@^7.0.0
@@ -19,12 +23,19 @@ cbuild-pack:
     - resolved-pack: ARM::SSE_320_BSP@1.1.0
       selected-by-pack:
         - ARM::SSE_320_BSP@1.1.0
+    - resolved-pack: ARM::ethos-u-core-driver@1.25.2
+      selected-by-pack:
+        - ARM::ethos-u-core-driver@1.25.2
     - resolved-pack: ARM::ethos-u-core-driver@1.26.2
       selected-by-pack:
         - ARM::ethos-u-core-driver@^1.25.2
     - resolved-pack: AlifSemiconductor::Ensemble@2.2.0-dev8
       selected-by-pack:
+        - AlifSemiconductor::Ensemble@^2.1.1-0
         - AlifSemiconductor::Ensemble@^2.2.0-0
+    - resolved-pack: Keil::MDK-Middleware@8.1.0
+      selected-by-pack:
+        - Keil::MDK-Middleware@^8.0.0
     - resolved-pack: SEGGER::RTT@8.58.0
       selected-by-pack:
         - SEGGER::RTT@^8.58.0

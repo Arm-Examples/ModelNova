@@ -143,7 +143,7 @@ The action executes the following commands to build and test the application.
 > [!TIP]
 > You can clone the repository and run the workflow and examine the test results in detail.
 
-The picture below shows the output of the [Test_RPS_SSE-320-U85.yml action](./actions/workflows/Test_RPS_SSE-320-U85.yml). The artifacts file `RPS_SSE-320-U85_FVP` contains the `out` directory with the generated image and new `SDS recordings` captured during playback (`*.p.sds` files) along with the simulation log file (`sdsio.log`).
+The picture below shows the output of the [Test_RPS_SSE-320-U85.yml action](https://github.com/Arm-Examples/ModelNova/actions/workflows/Test_RPS_SSE-320-U85.yml). The artifacts file `RPS_SSE-320-U85_FVP` contains the `out` directory with the generated image and new `SDS recordings` captured during playback (`*.p.sds` files) along with the simulation log file (`sdsio.log`).
 
 ![GitHub Action Output: Test_RPS_SSE-320-U85.yml](./Documentation/image/Test_RPS_SSE-320-U85.png)
 
@@ -159,10 +159,10 @@ The [Run_RPS_AppKit-E8.yml](./.github/workflows/Run_RPS_AppKit-E8.yml) workflow 
 
 Once the test completes, the RTT output and SystemView data file (captured with pyOCD), and the recorded SDS data files with extension `.p.sds` (captured with SDSIO-Server), are uploaded as artifacts.
 
-The picture below shows the output of the [Run_RPS_AppKit-E8.yml action](./.actions/workflows/Run_RPS_AppKit-E8.yml). The artifact `RPS_AppKit-E8-U85_HIL` contains the generated image, and the run uploads the log file `sdsio-server.log` together with new `SDS recordings` captured during playback (`*.p.sds` files).
+The picture below shows the output of the [Run_RPS_AppKit-E8.yml action](https://github.com/Arm-Examples/ModelNova/actions/workflows/Run_RPS_AppKit-E8.yml). The artifact `RPS_AppKit-E8-U85_HIL` contains the generated image, and the run uploads the log file `sdsio-server.log` together with new `SDS recordings` captured during playback (`*.p.sds` files).
 
 ![GitHub Action Output: Run_RPS_AppKit-E8.yml](./Documentation/image/Run_RPS_AppKit-E8.png)
 
 ## Issues or Questions
 
-Use the [**Issues**](./issues) tab to raise questions or issues.
+Use the [**Issues**](https://github.com/Arm-Examples/ModelNova/issues) tab to raise questions or issues.
