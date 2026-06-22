@@ -20,7 +20,6 @@ on:
   workflow_run:
     workflows: ["Build RPS for AppKit-E8 Hardware"]
     types: [completed]
-    branches: [main]
 
 permissions:
   contents: read
