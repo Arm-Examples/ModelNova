@@ -27,8 +27,21 @@ permissions:
   actions: read
 
 jobs:
+  runner-blocked-for-forks:
+    name: Block fork PRs from custom runner
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_repository.full_name != github.repository }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify about runner restriction for fork PRs
+        run: |
+          echo " External contributors cannot run workflows on the Raspberry Pi custom runner and are intentionally restricted"
+          echo "Fork PRs use GitHub-hosted runners only."
+
   CI:
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success') }}
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository) }}
     runs-on: [self-hosted, rsp-p5-01]
 
     steps:
