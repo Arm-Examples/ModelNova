@@ -19,28 +19,41 @@ on:
   workflow_dispatch:
   workflow_run:
     workflows: ["Build RPS for AppKit-E8 Hardware"]
-    types: [completed]
+    branches: [ main ]
+    types: [ completed ]
 
 permissions:
   contents: read
   actions: read
 
 jobs:
-  runner-blocked-for-forks:
-    name: Block fork PRs from custom runner
-    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_repository.full_name != github.repository }}
+  fork-restricted:
+    name: Private runner restricted
+    # trigger this only for forks, to prevent them from action runout
+    if: ${{ github.repository != 'Arm-Examples/ModelNova' }}
     runs-on: ubuntu-latest
+
     steps:
-      - name: Notify about runner restriction for fork PRs
+      - name: Notify runner restriction
         run: |
-          echo " External contributors cannot run workflows on the Raspberry Pi custom runner and are intentionally restricted"
-          echo "Fork PRs use GitHub-hosted runners only."
+          MESSAGE="Workflows on the private runner are restricted for security reasons."
+          GUIDANCE="Contributors can validate changes using GitHub-hosted runners."
+          echo "${MESSAGE}"
+          echo "${GUIDANCE}"
+          {
+            echo "## ⚠️ Workflow was not run"
+            echo ""
+            echo "${MESSAGE}"
+            echo ""
+            echo "${GUIDANCE}"
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
 
   CI:
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
+      ${{ (github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_repository.full_name == github.repository) }}
+      github.event.workflow_run.head_repository.full_name == 'Arm-Examples/ModelNova')) }}
     runs-on: [self-hosted, rsp-p5-01]
 
     steps:
@@ -68,7 +81,7 @@ jobs:
           nohup pyocd run --uid L96807771A --cbuild-run SDS+AppKit-E8-U85.cbuild-run.yml --timelimit 30 --eot > pyocd.out 2>&1 &
 
       - name: Start the SDSIO server on the Raspberry Pi
-        working-directory: ./RockPaperScissors/AppKit-E8_USB      
+        working-directory: ./RockPaperScissors/AppKit-E8_USB
         run: |
           sleep 2 # Delay to ensure that pyOCD is started
           sdsio-server --control SDS.sdsio.yml --playback --exit-after-playback --no-progress-info | tee sdsio-server.log
