@@ -23,7 +23,7 @@ permissions:
   actions: read
 
 jobs:
-  FORK-CHECK:
+  RUNNER-GATE:
     if: ${{ github.repository != 'Arm-Examples/ModelNova' && github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
 
