@@ -22,6 +22,10 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   CI:
     runs-on: ubuntu-latest
@@ -67,3 +71,8 @@ jobs:
           name: RPS_AppKit-E8-U85_HIL
           path: |
             ./RockPaperScissors/AppKit-E8_USB/out
+
+  HARDWARE-RUN:
+    needs: [ CI ]
+    uses: ./.github/workflows/Run_RPS_AppKit-E8.yml
+    secrets: inherit
