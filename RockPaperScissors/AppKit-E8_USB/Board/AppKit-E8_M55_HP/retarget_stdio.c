@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------
- * Copyright (c) 2025-2026 Arm Limited (or its affiliates).
+ * Copyright (c) 2025 Arm Limited (or its affiliates).
  * All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -23,18 +23,14 @@
 
 #include "RTE_Components.h"
 #include CMSIS_target_header
-#include "cmsis_os2.h"
 
 /* Compile-time configuration */
 #ifndef UART_BAUDRATE
 #define UART_BAUDRATE 115200
 #endif
 
-/* Exported functions */
+/* Exported function */
 extern int stdio_init(void);
-extern int stdin_getchar(void);
-extern int stdout_putchar(int ch);
-extern int stderr_putchar(int ch);
 
 /* Reference to the underlying USART driver */
 #define ptrUSART (&ARM_Driver_USART_(RETARGET_STDIO_UART))
@@ -56,8 +52,8 @@ int stdio_init(void)
     }
 
     if (ptrUSART->Control(ARM_USART_MODE_ASYNCHRONOUS | ARM_USART_DATA_BITS_8 |
-                          ARM_USART_PARITY_NONE | ARM_USART_STOP_BITS_1 |
-                          ARM_USART_FLOW_CONTROL_NONE,
+                              ARM_USART_PARITY_NONE | ARM_USART_STOP_BITS_1 |
+                              ARM_USART_FLOW_CONTROL_NONE,
                           UART_BAUDRATE) != ARM_DRIVER_OK) {
         return -1;
     }
@@ -76,65 +72,3 @@ int stdio_init(void)
 
     return 0;
 }
-
-#if defined(RTE_CMSIS_Compiler_STDIN_Custom)
-/**
-  Get a character from stdin
-
-  \return     The next character from the input, or -1 on read error.
-*/
-int stdin_getchar(void)
-{
-    uint8_t buf[1];
-
-    if (ptrUSART->Receive(buf, 1) != ARM_DRIVER_OK) {
-        return (-1);
-    }
-    while (ptrUSART->GetRxCount() != 1) {
-        osDelay(10U);
-    }
-    return (buf[0]);
-}
-#endif
-
-#if defined(RTE_CMSIS_Compiler_STDOUT_Custom)
-/**
-  Put a character to the stdout
-
-  \param[in]   ch  Character to output
-  \return          The character written, or -1 on write error.
-*/
-int stdout_putchar(int ch)
-{
-    uint8_t buf[1];
-
-    buf[0] = (uint8_t) ch;
-    if (ptrUSART->Send(buf, 1) != ARM_DRIVER_OK) {
-        return (-1);
-    }
-    while (ptrUSART->GetTxCount() != 1) {
-    }
-    return ch;
-}
-#endif
-
-#if defined(RTE_CMSIS_Compiler_STDERR_Custom)
-/**
-  Put a character to the stderr
-
-  \param[in]   ch  Character to output
-  \return          The character written, or -1 on write error.
-*/
-int stderr_putchar(int ch)
-{
-    uint8_t buf[1];
-
-    buf[0] = (uint8_t) ch;
-    if (ptrUSART->Send(buf, 1) != ARM_DRIVER_OK) {
-        return (-1);
-    }
-    while (ptrUSART->GetTxCount() != 1) {
-    }
-    return ch;
-}
-#endif

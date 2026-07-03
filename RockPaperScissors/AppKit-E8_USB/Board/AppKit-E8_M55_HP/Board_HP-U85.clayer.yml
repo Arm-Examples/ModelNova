@@ -33,11 +33,11 @@ layer:
 
   # List the packs used in the layer.
   packs:
-    - pack: AlifSemiconductor::Ensemble@^2.1.1-0
+    - pack: AlifSemiconductor::Ensemble@^2.2.0-0
     - pack: ARM::CMSIS@^6.2.0
     - pack: ARM::CMSIS-Compiler@^2.1.0
     - pack: ARM::CMSIS-Driver@^2.10.0
-    - pack: ARM::ethos-u-core-driver@1.25.2
+    - pack: ARM::ethos-u-core-driver@^1.26.2
 
   # List miscellaneous options passed via the command line to the build tool.
   misc:
@@ -90,6 +90,9 @@ layer:
 
     - component: Machine Learning:NPU Support:Ethos-U Driver&Generic U85
 
+    - component: Services:Retarget IO:STDERR
+    - component: Services:Retarget IO:STDIN
+    - component: Services:Retarget IO:STDOUT
     - component: Services:Secure Enclave:core&Source
     - component: Services:Secure Enclave:Initialization Helper&Source
 

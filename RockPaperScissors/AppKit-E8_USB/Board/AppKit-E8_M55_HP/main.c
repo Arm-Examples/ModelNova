@@ -26,7 +26,6 @@
 #include "board_config.h"
 #include "ethosu_driver.h"
 #include "ext_init.h"
-#include "core_cm55.h"
 #include "main.h"
 
 #include "profiler.h"
@@ -86,18 +85,6 @@ void vbat_init(void)
     VBAT->PWR_CTRL &= ~VBAT_PWR_CTRL_UPHY_ISO;
 }
 
-/*
-    Enable the CPU I-Cache and D-Cache.
-*/
-static void CpuCacheEnable(void)
-{
-    /* Enable I-Cache */
-    SCB_EnableICache();
-
-    /* Enable D-Cache */
-    SCB_EnableDCache();
-}
-
 int main(void)
 {
     /* Apply pin configuration */
@@ -135,9 +122,6 @@ int main(void)
 #ifdef CMSIS_shield_header
     shield_setup();
 #endif
-
-    /* Enable the CPU Cache */
-    CpuCacheEnable();
 
 #if ENABLE_TIME_PROFILING
     /* Initialize ET PAL */

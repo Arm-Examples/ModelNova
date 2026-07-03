@@ -4,7 +4,7 @@
 #include "app_mem_regions.h"
 
 #define __ROM_BASE      APP_MRAM_HP_BASE
-#define __ROM_SIZE      APP_MRAM_HP_SIZE
+#define __ROM_SIZE      APP_CODE_MRAM_SIZE
 
 #define __ITCM_BASE     APP_ITCM_BASE
 #define __ITCM_SIZE     APP_HP_ITCM_SIZE
@@ -79,6 +79,11 @@ LR_ROM __ROM_BASE NOCOMPRESS __ROM_SIZE  {    ; load region size_region
   }
 
   ARM_LIB_STACK __STACK_TOP EMPTY -__STACK_SIZE {   ; Reserve empty region for stack
+  }
+
+  MRAM_USER  APP_MRAM_USER_BASE  APP_MRAM_USER_SIZE  {
+   * (.mram_user)
+   * (.mram_user_bss)
   }
 
 #if (SRAM0_SRAM1_COMBINED == 1)
