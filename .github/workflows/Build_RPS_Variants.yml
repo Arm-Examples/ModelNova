@@ -71,7 +71,6 @@ jobs:
         working-directory: ./
         run: |
           cpackget add ./packs/PyTorch.ExecuTorch.1.1.0-rc1-build.12/PyTorch.ExecuTorch.pdsc --agree-embedded-license
-          cpackget add ./packs/AlifSemiconductor.Ensemble.2.2.0-dev8+g560eb47.pack --agree-embedded-license
 
       - name: ${{matrix.context.tool}} Build-Test for context ${{matrix.context.proj}}.${{matrix.context.build-type}}+${{matrix.context.target-type}}
         working-directory: ${{matrix.context.dir}}
