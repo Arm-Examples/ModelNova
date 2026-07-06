@@ -40,7 +40,7 @@ jobs:
           exit 1
 
   CI:
-    if: ${{ ((github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' ) && github.repository == 'Arm-Examples/ModelNova') }}
+    if: ${{ github.repository == 'Arm-Examples/ModelNova' }}
     runs-on: [self-hosted, rsp-p5-01]
 
     steps:
