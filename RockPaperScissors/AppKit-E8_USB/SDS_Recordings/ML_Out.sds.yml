@@ -1,7 +1,7 @@
 sds:
   name: ML output
   description: ML classification results
-  frequency: 8.33
+  sample-frequency: 8.33
   content:
   - value: PAPER
     type:  float
