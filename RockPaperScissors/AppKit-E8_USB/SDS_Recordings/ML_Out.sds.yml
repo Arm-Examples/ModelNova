@@ -3,11 +3,11 @@ sds:
   description: ML classification results
   sample-frequency: 8.33
   content:
-  - value: PAPER
-    type:  float
-  - value: ROCK
-    type:  float
-  - value: SCISSORS
-    type:  float
-  - value: UNKNOWN
-    type:  float
+    - value: PAPER
+      type:  float
+    - value: ROCK
+      type:  float
+    - value: SCISSORS
+      type:  float
+    - value: UNKNOWN
+      type:  float
