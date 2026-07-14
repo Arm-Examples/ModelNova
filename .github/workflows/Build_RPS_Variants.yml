@@ -45,7 +45,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Activate vcpkg
         uses: ARM-software/cmsis-actions/vcpkg@v1
@@ -61,7 +61,7 @@ jobs:
           cpackget update-index
 
       - name: Cache downloaded packs
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           key: ModelNova
           path: /home/runner/.cache/arm/packs/.Download
