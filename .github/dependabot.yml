@@ -18,7 +18,3 @@ updates:
 
     commit-message:
       prefix: "ci"
-
-    labels:
-      - "dependencies"
-      - "github-actions"
