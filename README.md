@@ -22,7 +22,7 @@ The [RockPaperScissors (RPS)](./Documentation/README.md) project implements an A
 2. Clone this repository (for example using [Git in VS Code](https://code.visualstudio.com/docs/sourcecontrol/intro-to-git)) or download the ZIP file. Then open the base folder in VS Code.
 3. Open the [CMSIS View](https://mdk-packs.github.io/vscode-cmsis-solution-docs/userinterface.html#2-main-area-of-the-cmsis-view) in VS Code, use *Open Solution in Workspace* (... menu), and choose `RockPaperScissors/AppKit-E8_USB/SDS.csolution.yml` to open the project.
 4. The related tools and software packs are downloaded and installed. Review progress with *View - Output - CMSIS Solution*.
-5. In the CMSIS view, use the [Action buttons](https://github.com/ARM-software/vscode-cmsis-csolution?tab=readme-ov-file#action-buttons) to build, load, and debug the example to the [target hardware](./Documentation/README.md#target-hardware).
+5. In the CMSIS view, use the [Action buttons](https://github.com/Open-CMSIS-Pack/vscode-cmsis-solution#action-buttons) to build, load, and debug the example to the [target hardware](./Documentation/README.md#target-hardware).
 
 > [!TIP]
 > If you are new to Alif devices and boards, start with the `Blink_HP` example project using *Create Solution* with the board `Alif AppKit-E8-AIML`.
