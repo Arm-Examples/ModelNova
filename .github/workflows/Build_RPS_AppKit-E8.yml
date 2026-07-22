@@ -21,6 +21,8 @@ on:
     branches: [main]
   push:
     branches: [main]
+  schedule:
+  - cron: '0 20 * * 0' # Runs at 20:00 on Sunday
 
 permissions:
   contents: read
