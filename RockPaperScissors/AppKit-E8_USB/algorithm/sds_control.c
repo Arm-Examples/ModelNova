@@ -45,6 +45,7 @@ osThreadAttr_t attr_sdsControlThread = {
 static volatile uint32_t idle_cnt     = 0U;
 static volatile uint8_t  rst_idle_cnt = 0U;
 static          uint32_t no_load_cnt  = 0U;
+static volatile bool     output_prediction_metadata_enabled = false;
 
 #ifdef RTE_CMSIS_RTOS2_RTX5
 // Measure system idle time if OS is RTX5
@@ -152,6 +153,26 @@ void sdsStatusLED (void) {
   ticks--;
 }
 
+// Output metadata control state driven by SDSIO user flag 5.
+bool sdsIsPredictionMetadataEnabled (void) {
+  return output_prediction_metadata_enabled;
+}
+
+static void sdsPredictionMetadataControlUpdate (void) {
+  bool requested;
+
+  requested = ((sdsFlags & SDS_USER_FLAG_OUTPUT_PREDICTION_METADATA) != 0U);
+
+  if (requested != output_prediction_metadata_enabled) {
+    output_prediction_metadata_enabled = requested;
+    if (requested) {
+      sdsFlagsModify(SDS_USER_FLAG_OUTPUT_PREDICTION_METADATA, 0U);
+    } else {
+      sdsFlagsModify(0U, SDS_USER_FLAG_OUTPUT_PREDICTION_METADATA);
+    }
+  }
+}
+
 // SDS event callback
 static void sds_event_callback (sdsId_t id, uint32_t event) {
   (void)id;
@@ -193,6 +214,7 @@ __NO_RETURN void sdsControlThread (void *argument) {
 
   for (;;) {
     sdsExchange();                              // Exchange control information with host
+    sdsPredictionMetadataControlUpdate();       // Update runtime ML_Out format control
 
     // Detect if user button was pressed
     btn_val  = vioGetSignal(vioBUTTON0);

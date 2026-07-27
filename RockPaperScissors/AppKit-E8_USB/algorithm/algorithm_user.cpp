@@ -159,16 +159,19 @@ void ResetAlgorithm (void) {
  */
 
 /**
-  \fn           int32_t ExecuteAlgorithm (uint8_t *in_buf, uint32_t in_num, uint8_t *out_buf, uint32_t out_num)
+  \fn           int32_t ExecuteAlgorithm (uint8_t *in_buf, uint32_t in_num, uint8_t *out_buf, uint32_t out_num, bool output_prediction_metadata)
   \brief        Execute algorithm under test.
   \param[in]    in_buf          pointer to input frame buffer (RGB888, HWC, 224x224x3)
   \param[in]    in_num          number of bytes in input buffer
   \param[out]   out_buf         pointer to output buffer (receives runner_output_label_t)
   \param[in]    out_num         maximum bytes available in output buffer
+  \param[in]    output_prediction_metadata
+                              true to emit predicted class metadata, false to emit class scores
   \return       0 on success; -1 on error
 */
 int32_t ExecuteAlgorithm(uint8_t *in_buf, uint32_t in_num,
-                         uint8_t *out_buf, uint32_t out_num) {
+                         uint8_t *out_buf, uint32_t out_num,
+                         bool output_prediction_metadata) {
 
 #ifndef SIMULATOR
     vStreamStatus_t v_status;
@@ -223,7 +226,8 @@ int32_t ExecuteAlgorithm(uint8_t *in_buf, uint32_t in_num,
     uint32_t post_process_time = profiler_start();
 #endif
 
-    postprocess(*ctx, in_buf, IMAGE_WIDTH, IMAGE_HEIGHT, out_buf, out_num);
+    postprocess(*ctx, in_buf, IMAGE_WIDTH, IMAGE_HEIGHT, out_buf, out_num,
+                output_prediction_metadata);
 
 #if !defined(SIMULATOR) && defined(USE_SEGGER_SYSVIEW)
     SEGGER_SYSVIEW_MarkStop(SYSVIEW_MARKER_POST_PROCESS);

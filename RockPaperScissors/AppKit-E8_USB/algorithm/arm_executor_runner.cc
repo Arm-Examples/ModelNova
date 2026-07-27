@@ -942,26 +942,30 @@ void print_outputs(RunnerContext& ctx)
  * \param[in]     img_height Frame height in pixels
  * \param[out]    out_buf  Caller buffer to receive detection_result_t result.
  * \param[in]     out_num  Byte size of out_buf.
+ * \param[in]     output_prediction_metadata
+ *                  true to emit predicted class metadata, false to emit class scores.
  */
 void postprocess(RunnerContext& ctx, uint8_t* img_buf,
                  uint32_t img_width, uint32_t img_height,
-                 uint8_t* out_buf, uint32_t out_num) {
+                 uint8_t* out_buf, uint32_t out_num,
+                 bool output_prediction_metadata) {
 
     memset(&output_label, 0, sizeof(output_label));
 
     /* Decode output tensor → output_label, conf_int, classify_object */
     print_outputs(ctx);
 
-    /* Copy shortened label plus confidence into caller's output buffer */
-#if OUTPUT_PREDICTION_METADATA
-    if (out_num >= sizeof(output_label_t)) {
-        memcpy(out_buf, &output_label, sizeof(output_label));
+    if (output_prediction_metadata) {
+        /* Copy predicted label, confidence, and class index into caller's output buffer */
+        if (out_num >= sizeof(output_label_t)) {
+            memcpy(out_buf, &output_label, sizeof(output_label));
+        }
+    } else {
+        /* Copy class confidence scores into caller's output buffer */
+        if (out_num >= sizeof(class_probs)) {
+            memcpy(out_buf, class_probs, sizeof(class_probs));
+        }
     }
-#else
-    if (out_num >= sizeof(class_probs)) {
-        memcpy(out_buf, class_probs, sizeof(class_probs));
-    }
-#endif
 
     /* Only draw if label is valid */
     if (output_label.label_name[0] != '\0')

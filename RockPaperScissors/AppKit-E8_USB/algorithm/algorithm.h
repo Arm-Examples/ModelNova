@@ -19,6 +19,7 @@
 #ifndef ALGORITHM_H_
 #define ALGORITHM_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef  __cplusplus
@@ -40,15 +41,18 @@ extern int32_t InitAlgorithm (void);
 extern void ResetAlgorithm (void);
 
 /**
-  \fn           int32_t ExecuteAlgorithm (uint8_t *in_buf, uint32_t in_num, uint8_t *out_buf, uint32_t out_num)
+  \fn           int32_t ExecuteAlgorithm (uint8_t *in_buf, uint32_t in_num, uint8_t *out_buf, uint32_t out_num, bool output_prediction_metadata)
   \brief        Execute algorithm under test.
   \param[in]    in_buf          pointer to memory buffer containing input data for algorithm
   \param[in]    in_num          number of data bytes in input data buffer (in bytes)
   \param[out]   out_buf         pointer to memory buffer for returning algorithm output
   \param[in]    out_num         maximum number of data bytes returned as algorithm output (in bytes)
+  \param[in]    output_prediction_metadata
+                              true to emit predicted class metadata, false to emit class scores
   \return       0 on success; -1 on error
 */
-extern int32_t ExecuteAlgorithm (uint8_t *in_buf, uint32_t in_num, uint8_t *out_buf, uint32_t out_num);
+extern int32_t ExecuteAlgorithm (uint8_t *in_buf, uint32_t in_num, uint8_t *out_buf, uint32_t out_num,
+                                 bool output_prediction_metadata);
 
 #ifdef  __cplusplus
 }

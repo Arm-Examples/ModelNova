@@ -27,10 +27,9 @@ project:
     - C10_USING_CUSTOM_GENERATED_MACROS
     - ET_NUM_INFERENCES: 1
     - ET_LOG_DUMP_OUTPUT
-    - ET_DEBUG_BUFFER_SIZE: 0x8000 
+    - ET_DEBUG_BUFFER_SIZE: 0x8000
     - USE_PERFORMANCE_MONITOR
     - USE_SEGGER_SYSVIEW
-    - OUTPUT_PREDICTION_METADATA: 0
 
   setups:
     - setup: Scratch pool for non-simulator
