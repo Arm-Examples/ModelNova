@@ -40,15 +40,13 @@ The diagram below illustrates the RPS application architecture. During algorithm
 1. [Create the input interface](./Documentation/README.md#input-interface-and-signal-conditioning), add signal conditioning, and start capturing data for ML model training.
 2. [Select an ML model](./Documentation/README.md#create-ml-model), then use the captured data for training, analysis, and creation of the optimized ML model.
 3. [Integrate the ML model](./Documentation/README.md#integrate-ml-model) into the SDS framework and analyze performance.
-4. Configure `OUTPUT_PREDICTION_METADATA` based on your workflow:
+4. Configure ML output prediction metadata at runtime using SDS user flag 5 (`1UL << 5`).
 
-   **Configuration file:**
-   `RockPaperScissors/AppKit-E8_USB/algorithm/AlgorithmTest.cproject.yml`
-   - Set `OUTPUT_PREDICTION_METADATA = 0` to view the generated `.sds` files using the Arm SDS VS Code extension.
-   - Set `OUTPUT_PREDICTION_METADATA = 1` to enable live inference streaming in Fusion Studio, which parses the prediction metadata (predicted class label, confidence score, and class index) to render overlayed frames.
+   - Set the flag to include prediction metadata (predicted class label, confidence score, and class index) for live inference streaming in Fusion Studio.
+   - Clear the flag to record `ML_Out.sds` with only class confidence scores.
     > [!Note]
     >
-    > By default, `OUTPUT_PREDICTION_METADATA` is set to `0`
+    > Prediction metadata is disabled by default.
 
 **Test Embedded Application:**
 

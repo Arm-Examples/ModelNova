@@ -19,13 +19,19 @@
 #ifndef SDS_CONTROL_H_
 #define SDS_CONTROL_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 #include "cmsis_compiler.h"
+
+#define SDS_USER_FLAG_OUTPUT_PREDICTION_METADATA (1UL << 5)
 
 #ifdef  __cplusplus
 extern "C"
 {
 #endif
+
+// Returns true when ML_Out should include predicted class metadata.
+extern bool sdsIsPredictionMetadataEnabled (void);
 
 // SDS control thread function
 extern __NO_RETURN void sdsControlThread (void *argument);

@@ -113,8 +113,10 @@ bool run_inference(RunnerContext &ctx);
  * \param[in]     img_height Frame height in pixels
  * \param[out]    out_buf  Caller buffer to receive runner_output_label_t result.
  * \param[in]     out_num  Byte size of out_buf.
+ * \param[in]     output_prediction_metadata
+ *                  true to emit predicted class metadata, false to emit class scores.
  */
 void postprocess(RunnerContext &ctx, uint8_t *img_buf, uint32_t img_width, uint32_t img_height,
-                 uint8_t *out_buf, uint32_t out_num);
+                 uint8_t *out_buf, uint32_t out_num, bool output_prediction_metadata);
 
 #endif /* ARM_EXECUTOR_RUNNER_H */

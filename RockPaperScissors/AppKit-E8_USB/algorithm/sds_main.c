@@ -23,6 +23,7 @@
 #include "algorithm.h"
 #include "data_in.h"
 #include "app_setup.h"
+#include "sds_control.h"
 
 
 // SDS system state consistent with main AlgorithmThread loop
@@ -37,11 +38,13 @@ uint8_t record_camera = 0U;
 // Algorithm input/output data buffer
 static uint8_t algo_data_in_buf [ALGO_DATA_IN_BLOCK_SIZE]  __ALIGNED(4);
 static uint8_t algo_data_out_buf[ALGO_DATA_OUT_BLOCK_SIZE] __ALIGNED(4);
+static uint8_t algo_data_out_metadata_buf[ALGO_DATA_OUT_METADATA_BLOCK_SIZE] __ALIGNED(4);
 
 // SDS buffers
 static uint8_t sds_camera_buf  [CAMERA_FRAME_SIZE              + 2048] __ALIGNED(4);
 static uint8_t sds_data_in_buf [ALGO_DATA_IN_BLOCK_SIZE        + 2048] __ALIGNED(4);
 static uint8_t sds_data_out_buf[(ALGO_DATA_OUT_BLOCK_SIZE * 2) + 2048] __ALIGNED(4);
+static uint8_t sds_data_out_metadata_buf[(ALGO_DATA_OUT_METADATA_BLOCK_SIZE * 2) + 2048] __ALIGNED(4);
 
 // SDS stream identifiers
        sdsId_t sds_camera_id   = NULL;
@@ -52,6 +55,22 @@ static sdsId_t sds_data_out_id = NULL;
 static const char *SDS_MODE[] = { "recording", "playback" };
 
 // Public functions
+
+static uint8_t *active_algo_data_out_buf = algo_data_out_buf;
+static uint32_t active_algo_data_out_size = ALGO_DATA_OUT_BLOCK_SIZE;
+static bool active_output_prediction_metadata = false;
+
+static void ConfigureAlgorithmOutput (bool output_prediction_metadata) {
+  if (output_prediction_metadata) {
+    active_algo_data_out_buf = algo_data_out_metadata_buf;
+    active_algo_data_out_size = ALGO_DATA_OUT_METADATA_BLOCK_SIZE;
+    active_output_prediction_metadata = true;
+  } else {
+    active_algo_data_out_buf = algo_data_out_buf;
+    active_algo_data_out_size = ALGO_DATA_OUT_BLOCK_SIZE;
+    active_output_prediction_metadata = false;
+  }
+}
 
 /**
   \fn           int32_t OpenStreams (void)
@@ -90,7 +109,12 @@ int32_t OpenStreams (void) {
   }
   // Open stream for recording of output data
   if (sds_data_in_id != NULL) {
-    sds_data_out_id = sdsOpen("ML_Out", sdsModeWrite, sds_data_out_buf, sizeof(sds_data_out_buf));
+    ConfigureAlgorithmOutput(sdsIsPredictionMetadataEnabled());
+    if (active_output_prediction_metadata) {
+      sds_data_out_id = sdsOpen("ML_Out", sdsModeWrite, sds_data_out_metadata_buf, sizeof(sds_data_out_metadata_buf));
+    } else {
+      sds_data_out_id = sdsOpen("ML_Out", sdsModeWrite, sds_data_out_buf, sizeof(sds_data_out_buf));
+    }
   }
 
   SDS_ASSERT(sds_data_in_id  != NULL);
@@ -233,7 +257,8 @@ __NO_RETURN void AlgorithmThread (void *argument) {
     }
 
     // Execute algorithm under test
-    if (ExecuteAlgorithm(algo_data_in_buf, sizeof(algo_data_in_buf), algo_data_out_buf, sizeof(algo_data_out_buf)) != 0) {
+    if (ExecuteAlgorithm(algo_data_in_buf, sizeof(algo_data_in_buf), active_algo_data_out_buf,
+                         active_algo_data_out_size, active_output_prediction_metadata) != 0) {
       // If there was an error executing algorithm skip recording
       continue;
     }
@@ -241,12 +266,12 @@ __NO_RETURN void AlgorithmThread (void *argument) {
     if (sds_state == SDS_STATE_ACTIVE) {
       // Record algorithm output data
       do {
-        ret = sdsWrite(sds_data_out_id, timeslot, algo_data_out_buf, sizeof(algo_data_out_buf));
+        ret = sdsWrite(sds_data_out_id, timeslot, active_algo_data_out_buf, active_algo_data_out_size);
         if (ret == SDS_NO_SPACE) {
           osDelay(10U);
         }
       } while (ret == SDS_NO_SPACE);
-      SDS_ASSERT(ret == sizeof(algo_data_out_buf));
+      SDS_ASSERT(ret == active_algo_data_out_size);
     }
   }
 }
