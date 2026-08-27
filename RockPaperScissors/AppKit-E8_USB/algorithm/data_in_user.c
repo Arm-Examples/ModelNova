@@ -172,7 +172,7 @@ int32_t GetInputData (uint8_t *buf, uint32_t max_len) {
     do {
       ret = sdsWrite(sds_camera_id, timeslot, CAM_Frame, sizeof(CAM_Frame));
       if (ret == SDS_NO_SPACE) {
-        osDelay(10U);
+        osDelay(1U);
       }
     } while (ret == SDS_NO_SPACE);
     SDS_ASSERT(ret == sizeof(CAM_Frame));
