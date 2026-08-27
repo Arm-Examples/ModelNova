@@ -10,7 +10,7 @@ To run this example:
 
 - Install [Keil Studio for VS Code](https://marketplace.visualstudio.com/items?itemName=Arm.keil-studio-pack) and run a
   Blinky example on the board to verify tool installation.
-- Install SDS-Framework pack v3.0.0 or later from:
+- Install SDS-Framework pack v3.1.0 or later from:
     - `https://github.com/ARM-software/SDS-Framework/releases`
 - Setup the [Python environment](https://arm-software.github.io/SDS-Framework/main/utilities.html#setup) for running
   the SDS Utilities.
