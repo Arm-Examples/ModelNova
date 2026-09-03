@@ -28,11 +28,15 @@
 #endif
 
 #ifndef ALGO_DATA_OUT_BLOCK_SIZE
-#if defined(OUTPUT_PREDICTION_METADATA) && OUTPUT_PREDICTION_METADATA
-#define ALGO_DATA_OUT_BLOCK_SIZE    (120U)
-#else
 #define ALGO_DATA_OUT_BLOCK_SIZE    (MODEL_NUM_CLASSES * sizeof(float))
 #endif
+
+#ifndef ALGO_RESULT_OUT_BLOCK_SIZE
+#define ALGO_RESULT_OUT_BLOCK_SIZE  (120U)
+#endif
+
+#ifndef ALGO_RAW_OUT_BLOCK_SIZE
+#define ALGO_RAW_OUT_BLOCK_SIZE     (MODEL_NUM_CLASSES * sizeof(float))
 #endif
 
 #endif
