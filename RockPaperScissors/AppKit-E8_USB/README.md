@@ -70,16 +70,16 @@ When used in **recording** mode:
 - **Captures on-board camera stream** via SDS recording stream (ML_In.<n>.sds file)
 - **Executes ML inference** using an object detection ML model
 - **Captures algorithm output** via SDS recording stream (ML_Out.<n>.sds file)
-- **Captures prediction result metadata** via SDS recording stream (ML_Result.<n>.sds file)
-- **Captures raw output tensor** via SDS recording stream (ML_RawOutput.<n>.sds file)
+- **Optionally captures prediction result metadata** via SDS recording stream (ML_Result.<n>.sds file)
+- **Optionally captures raw output tensor** via SDS recording stream (ML_RawOutput.<n>.sds file)
 
 When used in **playback** mode:
 
 - **Replays pre-recorded video stream** via SDS playback stream (ML_In.<n>.sds file)
 - **Executes ML inference** using an object detection ML model
 - **Captures algorithm output** via SDS recording stream (ML_Out.<m>.sds file)
-- **Captures prediction result metadata** via SDS recording stream (ML_Result.<m>.sds file)
-- **Captures raw output tensor** via SDS recording stream (ML_RawOutput.<m>.sds file)
+- **Optionally captures prediction result metadata** via SDS recording stream (ML_Result.<m>.sds file)
+- **Optionally captures raw output tensor** via SDS recording stream (ML_RawOutput.<m>.sds file)
 
 ### Setup
 
@@ -127,8 +127,10 @@ Model initialized. Ready for inference.
 
 To execute the **recording** test, just:
 
-1. Press the **joystick (SW2)** on the board or press `R` key in the SDSIO Server window to start the recording.
-2. Press the **joystick (SW2)** again or press `S` key in the SDSIO Server window to stop the recording.
+1. Optionally press `F` in the SDSIO Server window to enable `ML_Result` and `ML_RawOutput` from the start of the run.
+2. Press the **joystick (SW2)** on the board or press `R` key in the SDSIO Server window to start the recording.
+3. Optionally press `f` in the SDSIO Server window to stop recording the optional output streams while recording continues.
+4. Press the **joystick (SW2)** again or press `S` key in the SDSIO Server window to stop the recording.
 
 **SDSIO Server Output:**
 
@@ -138,7 +140,8 @@ Press Ctrl+C to exit.
 Starting SDS Control Flags thread. R=record, P=playback, S/s=stop, X/x=terminate, A-H=set flags 0-7, a-h=clear flags 0-7.
 Starting USB Server...
 SDSIO Client USB device connected.
-sdsFlags = 0x10000000
+sdsFlags = 0x10000020
+sdsFlags = 0x90000020
 40% idle
  :
 Record:   ML_In (c:\SDS\ML_In.0.sds)
@@ -146,7 +149,7 @@ Record:   ML_Out (c:\SDS\ML_Out.0.sds)
 Record:   ML_Result (c:\SDS\ML_Result.0.sds)
 Record:   ML_RawOutput (c:\SDS\ML_RawOutput.0.sds)
 ..............
-sdsFlags = 0x10000000
+sdsFlags = 0x90000000
 .
 Closed:   ML_In (c:\SDS\ML_In.0.sds)
 Closed:   ML_Out (c:\SDS\ML_Out.0.sds)
@@ -165,7 +168,7 @@ Confidence      : 99.51 %
 ...
 ==== SDS recording stopped
 ```
-Each run records four files: `ML_In.<n>.sds`, `ML_Out.<n>.sds`, `ML_Result.<n>.sds`, and `ML_RawOutput.<n>.sds` in the directory where SDSIO Server was started. `<n>` is a sequential number.
+Each run records `ML_In.<n>.sds` and `ML_Out.<n>.sds` by default. If flag `F` is set before or during streaming, it also records `ML_Result.<n>.sds` and `ML_RawOutput.<n>.sds`. Use `F` before `R` to include these files from the start of the recording. `<n>` is a sequential number.
 
 #### Check SDS Files
 
@@ -193,7 +196,7 @@ To execute the **playback** test, just:
 1. Press the `P` key in the SDSIO Server window to start the playback.
 2. Press the `S` key in the SDSIO Server window to stop the playback.
 
-The stream `ML_In.<n>.sds` is read back and the algorithm processes this data. The streams `ML_Out.<n>.p.sds`, `ML_Result.<n>.p.sds`, and `ML_RawOutput.<n>.p.sds` are written.
+The stream `ML_In.<n>.sds` is read back and the algorithm processes this data. The stream `ML_Out.<n>.p.sds` is written by default. If flag `F` is set before or during streaming, `ML_Result.<n>.p.sds` and `ML_RawOutput.<n>.p.sds` are also written.
 
 > Note:
 >
@@ -209,6 +212,8 @@ sdsControl: start playback ('P')
 sdsFlags = 0xB0000000
 Playback: ML_In (c:\SDS\ML_In.0.sds)
 Record:   ML_Out (c:\SDS\ML_Out.0.p.sds)
+...
+sdsFlags = 0xB0000020
 Record:   ML_Result (c:\SDS\ML_Result.0.p.sds)
 Record:   ML_RawOutput (c:\SDS\ML_RawOutput.0.p.sds)
 Closed:   ML_In (c:\SDS\ML_In.0.sds)
@@ -228,7 +233,7 @@ sdsFlags = 0x30000000
 
 > Note:
 >
-> ML_Out, ML_Result, and ML_RawOutput files recorded during playback should be identical to the ones recorded earlier.
+> ML_Out file recorded during playback should be identical to the one recorded earlier. If optional result streams are enabled with flag `F`, ML_Result and ML_RawOutput playback files should also match the corresponding earlier recordings from the same enabled interval. Use `F` before `P` to include optional streams from the start of playback.
 
 ### Key Components
 

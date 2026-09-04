@@ -24,6 +24,7 @@
 #include "data_in.h"
 #include "app_setup.h"
 
+#define SDS_FLAG_RECORD_EXTRA_OUTPUTS  (1UL << 5)
 
 // SDS system state consistent with main AlgorithmThread loop
 uint32_t sds_state = SDS_STATE_INACTIVE;
@@ -56,6 +57,59 @@ static sdsId_t sds_raw_out_id    = NULL;
 
 // Recording/playback mode text
 static const char *SDS_MODE[] = { "recording", "playback" };
+
+static int32_t CloseExtraOutputStreams(void);
+
+static int32_t OpenExtraOutputStreams(void) {
+  int32_t status = 0;
+
+  if (sds_result_out_id == NULL) {
+    sds_result_out_id = sdsOpen("ML_Result", sdsModeWrite, sds_result_out_buf, sizeof(sds_result_out_buf));
+    if (sds_result_out_id == NULL) {
+      status = -1;
+    }
+  }
+
+  if ((status == 0) && (sds_raw_out_id == NULL)) {
+    sds_raw_out_id = sdsOpen("ML_RawOutput", sdsModeWrite, sds_raw_out_buf, sizeof(sds_raw_out_buf));
+    if (sds_raw_out_id == NULL) {
+      status = -1;
+    }
+  }
+
+  if (status != 0) {
+    (void)CloseExtraOutputStreams();
+  }
+
+  return status;
+}
+
+static int32_t CloseExtraOutputStreams(void) {
+  int32_t close_status;
+  int32_t status = 0;
+
+  if (sds_result_out_id != NULL) {
+    close_status = sdsClose(sds_result_out_id);
+    SDS_ERROR_CHECK(close_status);
+    if (close_status == SDS_OK) {
+      sds_result_out_id = NULL;
+    } else {
+      status = -1;
+    }
+  }
+
+  if (sds_raw_out_id != NULL) {
+    close_status = sdsClose(sds_raw_out_id);
+    SDS_ERROR_CHECK(close_status);
+    if (close_status == SDS_OK) {
+      sds_raw_out_id = NULL;
+    } else {
+      status = -1;
+    }
+  }
+
+  return status;
+}
 
 // Public functions
 
@@ -97,16 +151,12 @@ int32_t OpenStreams (void) {
   // Open stream for recording of output data
   if (sds_data_in_id != NULL) {
     sds_data_out_id = sdsOpen("ML_Out", sdsModeWrite, sds_data_out_buf, sizeof(sds_data_out_buf));
-    sds_result_out_id = sdsOpen("ML_Result", sdsModeWrite, sds_result_out_buf, sizeof(sds_result_out_buf));
-    sds_raw_out_id = sdsOpen("ML_RawOutput", sdsModeWrite, sds_raw_out_buf, sizeof(sds_raw_out_buf));
   }
 
-  SDS_ASSERT(sds_data_in_id    != NULL);
-  SDS_ASSERT(sds_data_out_id   != NULL);
-  SDS_ASSERT(sds_result_out_id != NULL);
-  SDS_ASSERT(sds_raw_out_id    != NULL);
+  SDS_ASSERT(sds_data_in_id  != NULL);
+  SDS_ASSERT(sds_data_out_id != NULL);
 
-  if ((camera_fail == 0U) && (sds_data_in_id != NULL) && (sds_data_out_id != NULL) && (sds_result_out_id != NULL) && (sds_raw_out_id != NULL)) {
+  if ((camera_fail == 0U) && (sds_data_in_id != NULL) && (sds_data_out_id != NULL)) {
     SDS_PRINTF("==== SDS %s started\n", SDS_MODE[play]);
   } else {
     sdsState = SDS_STATE_END;       // If files could not be opened then request streaming end
@@ -158,24 +208,10 @@ int32_t CloseStreams (void) {
       status = -1;
     }
   }
-  if (sds_result_out_id != NULL) {
-    close_status = sdsClose(sds_result_out_id);
-    SDS_ERROR_CHECK(close_status);
-    if (close_status == SDS_OK) {
-      sds_result_out_id = NULL;
-    } else {
-      status = -1;
-    }
+  if (CloseExtraOutputStreams() != 0) {
+    status = -1;
   }
-  if (sds_raw_out_id != NULL) {
-    close_status = sdsClose(sds_raw_out_id);
-    SDS_ERROR_CHECK(close_status);
-    if (close_status == SDS_OK) {
-      sds_raw_out_id = NULL;
-    } else {
-      status = -1;
-    }
-  }
+  sdsFlagsModify(0U, SDS_FLAG_RECORD_EXTRA_OUTPUTS);
 
   if (status == 0) {
     SDS_PRINTF("==== SDS %s stopped\n", SDS_MODE[play]);
@@ -265,14 +301,6 @@ __NO_RETURN void AlgorithmThread (void *argument) {
       // If there was an error executing algorithm skip recording
       continue;
     }
-    if (GetAlgorithmResultMetadata(algo_result_out_buf, sizeof(algo_result_out_buf)) != 0) {
-      // If there was an error retrieving metadata skip recording
-      continue;
-    }
-    if (GetAlgorithmRawOutputTensor(algo_raw_out_buf, sizeof(algo_raw_out_buf)) != 0) {
-      // If there was an error retrieving raw output tensor skip recording
-      continue;
-    }
 
     if (sds_state == SDS_STATE_ACTIVE) {
       // Record algorithm output data
@@ -284,23 +312,38 @@ __NO_RETURN void AlgorithmThread (void *argument) {
       } while (ret == SDS_NO_SPACE);
       SDS_ASSERT(ret == sizeof(algo_data_out_buf));
 
-      // Record prediction result metadata
-      do {
-        ret = sdsWrite(sds_result_out_id, timeslot, algo_result_out_buf, sizeof(algo_result_out_buf));
-        if (ret == SDS_NO_SPACE) {
-          osDelay(1U);
-        }
-      } while (ret == SDS_NO_SPACE);
-      SDS_ASSERT(ret == sizeof(algo_result_out_buf));
+      if ((sdsFlags & SDS_FLAG_RECORD_EXTRA_OUTPUTS) != 0U) {
+        if (OpenExtraOutputStreams() == 0) {
+          if (GetAlgorithmResultMetadata(algo_result_out_buf, sizeof(algo_result_out_buf)) != 0) {
+            continue;
+          }
+          if (GetAlgorithmRawOutputTensor(algo_raw_out_buf, sizeof(algo_raw_out_buf)) != 0) {
+            continue;
+          }
 
-      // Record raw output tensor
-      do {
-        ret = sdsWrite(sds_raw_out_id, timeslot, algo_raw_out_buf, sizeof(algo_raw_out_buf));
-        if (ret == SDS_NO_SPACE) {
-          osDelay(1U);
+          // Record prediction result metadata
+          do {
+            ret = sdsWrite(sds_result_out_id, timeslot, algo_result_out_buf, sizeof(algo_result_out_buf));
+            if (ret == SDS_NO_SPACE) {
+              osDelay(1U);
+            }
+          } while (ret == SDS_NO_SPACE);
+          SDS_ASSERT(ret == sizeof(algo_result_out_buf));
+
+          // Record raw output tensor
+          do {
+            ret = sdsWrite(sds_raw_out_id, timeslot, algo_raw_out_buf, sizeof(algo_raw_out_buf));
+            if (ret == SDS_NO_SPACE) {
+              osDelay(1U);
+            }
+          } while (ret == SDS_NO_SPACE);
+          SDS_ASSERT(ret == sizeof(algo_raw_out_buf));
+        } else {
+          sdsFlagsModify(0U, SDS_FLAG_RECORD_EXTRA_OUTPUTS);
         }
-      } while (ret == SDS_NO_SPACE);
-      SDS_ASSERT(ret == sizeof(algo_raw_out_buf));
+      } else {
+        (void)CloseExtraOutputStreams();
+      }
     }
   }
 }
