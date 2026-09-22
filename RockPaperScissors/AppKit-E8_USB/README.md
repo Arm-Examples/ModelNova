@@ -129,8 +129,7 @@ To execute the **recording** test, just:
 
 1. Optionally press `F` in the SDSIO Server window to enable `ML_Result` and `ML_RawOutput` from the start of the run.
 2. Press the **joystick (SW2)** on the board or press `R` key in the SDSIO Server window to start the recording.
-3. Optionally press `f` in the SDSIO Server window to stop recording the optional output streams while recording continues.
-4. Press the **joystick (SW2)** again or press `S` key in the SDSIO Server window to stop the recording.
+3. Press the **joystick (SW2)** again or press `S` key in the SDSIO Server window to stop the recording.
 
 **SDSIO Server Output:**
 
@@ -149,7 +148,6 @@ Record:   ML_Out (c:\SDS\ML_Out.0.sds)
 Record:   ML_Result (c:\SDS\ML_Result.0.sds)
 Record:   ML_RawOutput (c:\SDS\ML_RawOutput.0.sds)
 ..............
-sdsFlags = 0x90000000
 .
 Closed:   ML_In (c:\SDS\ML_In.0.sds)
 Closed:   ML_Out (c:\SDS\ML_Out.0.sds)
@@ -168,7 +166,7 @@ Confidence      : 99.51 %
 ...
 ==== SDS recording stopped
 ```
-Each run records `ML_In.<n>.sds` and `ML_Out.<n>.sds` by default. If flag `F` is set before or during streaming, it also records `ML_Result.<n>.sds` and `ML_RawOutput.<n>.sds`. Use `F` before `R` to include these files from the start of the recording. `<n>` is a sequential number.
+Each run records `ML_In.<n>.sds` and `ML_Out.<n>.sds` by default. If flag `F` is set before streaming starts, it also records `ML_Result.<n>.sds` and `ML_RawOutput.<n>.sds` for the full run. Changes to `F/f` during an active recording are ignored for that run; set `F` before starting the next run if optional streams are needed. `<n>` is a sequential number.
 
 #### Check SDS Files
 
@@ -193,10 +191,11 @@ Validation passed
 
 To execute the **playback** test, just:
 
-1. Press the `P` key in the SDSIO Server window to start the playback.
-2. Press the `S` key in the SDSIO Server window to stop the playback.
+1. Optionally press `F` in the SDSIO Server window to enable `ML_Result` and `ML_RawOutput` from the start of playback.
+2. Press the `P` key in the SDSIO Server window to start the playback.
+3. Press the `S` key in the SDSIO Server window to stop the playback.
 
-The stream `ML_In.<n>.sds` is read back and the algorithm processes this data. The stream `ML_Out.<n>.p.sds` is written by default. If flag `F` is set before or during streaming, `ML_Result.<n>.p.sds` and `ML_RawOutput.<n>.p.sds` are also written.
+The stream `ML_In.<n>.sds` is read back and the algorithm processes this data. The stream `ML_Out.<n>.p.sds` is written by default. If flag `F` is set before playback starts, `ML_Result.<n>.p.sds` and `ML_RawOutput.<n>.p.sds` are also written for the full playback run.
 
 > Note:
 >
@@ -209,13 +208,12 @@ The stream `ML_In.<n>.sds` is read back and the algorithm processes this data. T
 ```bash
 >sdsio-server.py usb
 sdsControl: start playback ('P')
-sdsFlags = 0xB0000000
+sdsFlags = 0xB0000020
 Playback: ML_In (c:\SDS\ML_In.0.sds)
 Record:   ML_Out (c:\SDS\ML_Out.0.p.sds)
-...
-sdsFlags = 0xB0000020
 Record:   ML_Result (c:\SDS\ML_Result.0.p.sds)
 Record:   ML_RawOutput (c:\SDS\ML_RawOutput.0.p.sds)
+...
 Closed:   ML_In (c:\SDS\ML_In.0.sds)
 .
 55% idle
@@ -233,7 +231,7 @@ sdsFlags = 0x30000000
 
 > Note:
 >
-> ML_Out file recorded during playback should be identical to the one recorded earlier. If optional result streams are enabled with flag `F`, ML_Result and ML_RawOutput playback files should also match the corresponding earlier recordings from the same enabled interval. Use `F` before `P` to include optional streams from the start of playback.
+> ML_Out file recorded during playback should be identical to the one recorded earlier. If optional result streams are enabled with flag `F`, ML_Result and ML_RawOutput playback files should also match the corresponding earlier recordings. Use `F` before `P` to include optional streams from the start of playback.
 
 ### Key Components
 

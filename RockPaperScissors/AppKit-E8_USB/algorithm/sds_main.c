@@ -153,10 +153,17 @@ int32_t OpenStreams (void) {
     sds_data_out_id = sdsOpen("ML_Out", sdsModeWrite, sds_data_out_buf, sizeof(sds_data_out_buf));
   }
 
+  // Optional output streams are session-level streams. Flag F must be set before start.
+  if ((sds_data_out_id != NULL) && ((sdsFlags & SDS_FLAG_RECORD_EXTRA_OUTPUTS) != 0U)) {
+    if (OpenExtraOutputStreams() != 0) {
+      sdsFlagsModify(0U, SDS_FLAG_RECORD_EXTRA_OUTPUTS);
+    }
+  }
+
   SDS_ASSERT(sds_data_in_id  != NULL);
   SDS_ASSERT(sds_data_out_id != NULL);
 
-  if ((camera_fail == 0U) && (sds_data_in_id != NULL) && (sds_data_out_id != NULL)) {
+  if ((status == 0) && (camera_fail == 0U) && (sds_data_in_id != NULL) && (sds_data_out_id != NULL)) {
     SDS_PRINTF("==== SDS %s started\n", SDS_MODE[play]);
   } else {
     sdsState = SDS_STATE_END;       // If files could not be opened then request streaming end
@@ -312,37 +319,31 @@ __NO_RETURN void AlgorithmThread (void *argument) {
       } while (ret == SDS_NO_SPACE);
       SDS_ASSERT(ret == sizeof(algo_data_out_buf));
 
-      if ((sdsFlags & SDS_FLAG_RECORD_EXTRA_OUTPUTS) != 0U) {
-        if (OpenExtraOutputStreams() == 0) {
-          if (GetAlgorithmResultMetadata(algo_result_out_buf, sizeof(algo_result_out_buf)) != 0) {
-            continue;
-          }
-          if (GetAlgorithmRawOutputTensor(algo_raw_out_buf, sizeof(algo_raw_out_buf)) != 0) {
-            continue;
-          }
-
-          // Record prediction result metadata
-          do {
-            ret = sdsWrite(sds_result_out_id, timeslot, algo_result_out_buf, sizeof(algo_result_out_buf));
-            if (ret == SDS_NO_SPACE) {
-              osDelay(1U);
-            }
-          } while (ret == SDS_NO_SPACE);
-          SDS_ASSERT(ret == sizeof(algo_result_out_buf));
-
-          // Record raw output tensor
-          do {
-            ret = sdsWrite(sds_raw_out_id, timeslot, algo_raw_out_buf, sizeof(algo_raw_out_buf));
-            if (ret == SDS_NO_SPACE) {
-              osDelay(1U);
-            }
-          } while (ret == SDS_NO_SPACE);
-          SDS_ASSERT(ret == sizeof(algo_raw_out_buf));
-        } else {
-          sdsFlagsModify(0U, SDS_FLAG_RECORD_EXTRA_OUTPUTS);
+      if ((sds_result_out_id != NULL) && (sds_raw_out_id != NULL)) {
+        if (GetAlgorithmResultMetadata(algo_result_out_buf, sizeof(algo_result_out_buf)) != 0) {
+          continue;
         }
-      } else {
-        (void)CloseExtraOutputStreams();
+        if (GetAlgorithmRawOutputTensor(algo_raw_out_buf, sizeof(algo_raw_out_buf)) != 0) {
+          continue;
+        }
+
+        // Record prediction result metadata
+        do {
+          ret = sdsWrite(sds_result_out_id, timeslot, algo_result_out_buf, sizeof(algo_result_out_buf));
+          if (ret == SDS_NO_SPACE) {
+            osDelay(1U);
+          }
+        } while (ret == SDS_NO_SPACE);
+        SDS_ASSERT(ret == sizeof(algo_result_out_buf));
+
+        // Record raw output tensor
+        do {
+          ret = sdsWrite(sds_raw_out_id, timeslot, algo_raw_out_buf, sizeof(algo_raw_out_buf));
+          if (ret == SDS_NO_SPACE) {
+            osDelay(1U);
+          }
+        } while (ret == SDS_NO_SPACE);
+        SDS_ASSERT(ret == sizeof(algo_raw_out_buf));
       }
     }
   }
