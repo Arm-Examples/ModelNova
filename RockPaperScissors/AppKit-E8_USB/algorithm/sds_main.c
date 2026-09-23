@@ -58,59 +58,6 @@ static sdsId_t sds_raw_out_id    = NULL;
 // Recording/playback mode text
 static const char *SDS_MODE[] = { "recording", "playback" };
 
-static int32_t CloseExtraOutputStreams(void);
-
-static int32_t OpenExtraOutputStreams(void) {
-  int32_t status = 0;
-
-  if (sds_result_out_id == NULL) {
-    sds_result_out_id = sdsOpen("ML_Result", sdsModeWrite, sds_result_out_buf, sizeof(sds_result_out_buf));
-    if (sds_result_out_id == NULL) {
-      status = -1;
-    }
-  }
-
-  if ((status == 0) && (sds_raw_out_id == NULL)) {
-    sds_raw_out_id = sdsOpen("ML_RawOutput", sdsModeWrite, sds_raw_out_buf, sizeof(sds_raw_out_buf));
-    if (sds_raw_out_id == NULL) {
-      status = -1;
-    }
-  }
-
-  if (status != 0) {
-    (void)CloseExtraOutputStreams();
-  }
-
-  return status;
-}
-
-static int32_t CloseExtraOutputStreams(void) {
-  int32_t close_status;
-  int32_t status = 0;
-
-  if (sds_result_out_id != NULL) {
-    close_status = sdsClose(sds_result_out_id);
-    SDS_ERROR_CHECK(close_status);
-    if (close_status == SDS_OK) {
-      sds_result_out_id = NULL;
-    } else {
-      status = -1;
-    }
-  }
-
-  if (sds_raw_out_id != NULL) {
-    close_status = sdsClose(sds_raw_out_id);
-    SDS_ERROR_CHECK(close_status);
-    if (close_status == SDS_OK) {
-      sds_raw_out_id = NULL;
-    } else {
-      status = -1;
-    }
-  }
-
-  return status;
-}
-
 // Public functions
 
 /**
@@ -122,6 +69,7 @@ int32_t OpenStreams (void) {
   int32_t status = 0;
   uint8_t play = 0U;
   uint8_t camera_fail = 0U;
+  uint8_t extra_outs_fail = 0U;
 
   if ((sdsFlags & SDS_FLAG_PLAYBACK) != 0U) {   // If open for playback requested
     play = 1U;
@@ -153,17 +101,26 @@ int32_t OpenStreams (void) {
     sds_data_out_id = sdsOpen("ML_Out", sdsModeWrite, sds_data_out_buf, sizeof(sds_data_out_buf));
   }
 
-  // Optional output streams are session-level streams. Flag F must be set before start.
-  if ((sds_data_out_id != NULL) && ((sdsFlags & SDS_FLAG_RECORD_EXTRA_OUTPUTS) != 0U)) {
-    if (OpenExtraOutputStreams() != 0) {
-      sdsFlagsModify(0U, SDS_FLAG_RECORD_EXTRA_OUTPUTS);
-    }
-  }
-
   SDS_ASSERT(sds_data_in_id  != NULL);
   SDS_ASSERT(sds_data_out_id != NULL);
 
-  if ((status == 0) && (camera_fail == 0U) && (sds_data_in_id != NULL) && (sds_data_out_id != NULL)) {
+  // Optional output streams are session-level streams. Flag F must be set before start.
+  if ((sdsFlags & SDS_FLAG_RECORD_EXTRA_OUTPUTS) != 0U) {
+    sdsFlagsModify(0U, SDS_FLAG_RECORD_EXTRA_OUTPUTS);
+
+    sds_result_out_id = sdsOpen("ML_Result", sdsModeWrite, sds_result_out_buf, sizeof(sds_result_out_buf));
+    sds_raw_out_id    = sdsOpen("ML_RawOutput", sdsModeWrite, sds_raw_out_buf, sizeof(sds_raw_out_buf));
+
+    SDS_ASSERT(sds_result_out_id != NULL);
+    SDS_ASSERT(sds_raw_out_id    != NULL);
+
+    if ((sds_result_out_id == NULL) || (sds_raw_out_id == NULL)) {
+      extra_outs_fail = 1U;
+    }
+  }
+
+  if ((status == 0) && (camera_fail == 0U) && (extra_outs_fail == 0U) &&
+      (sds_data_in_id != NULL) && (sds_data_out_id != NULL)) {
     SDS_PRINTF("==== SDS %s started\n", SDS_MODE[play]);
   } else {
     sdsState = SDS_STATE_END;       // If files could not be opened then request streaming end
@@ -215,10 +172,24 @@ int32_t CloseStreams (void) {
       status = -1;
     }
   }
-  if (CloseExtraOutputStreams() != 0) {
-    status = -1;
+  if (sds_result_out_id != NULL) {
+    close_status = sdsClose(sds_result_out_id);
+    SDS_ERROR_CHECK(close_status);
+    if (close_status == SDS_OK) {
+      sds_result_out_id = NULL;
+    } else {
+      status = -1;
+    }
   }
-  sdsFlagsModify(0U, SDS_FLAG_RECORD_EXTRA_OUTPUTS);
+  if (sds_raw_out_id != NULL) {
+    close_status = sdsClose(sds_raw_out_id);
+    SDS_ERROR_CHECK(close_status);
+    if (close_status == SDS_OK) {
+      sds_raw_out_id = NULL;
+    } else {
+      status = -1;
+    }
+  }
 
   if (status == 0) {
     SDS_PRINTF("==== SDS %s stopped\n", SDS_MODE[play]);
