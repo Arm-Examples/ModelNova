@@ -17,6 +17,7 @@
 #include <memory>
 #include <vector>
 #include "RTE_Components.h"
+#include "algorithm_config.h"
 #include "config_video.h"
 #include "image_processing_func.h"
 #include CMSIS_device_header
@@ -152,6 +153,9 @@ et_tick_ratio_t et_pal_ticks_to_ns_multiplier(void) {
  */
 typedef classification_result_t output_label_t;
 
+static_assert(sizeof(output_label_t) <= ALGO_RESULT_OUT_BLOCK_SIZE,
+              "Result metadata output block is too small");
+
 /* ============================================================================
  * External Variables
  * ============================================================================
@@ -179,6 +183,9 @@ bool classify_object = false;
 output_label_t output_label;
 
 float class_probs[MODEL_NUM_CLASSES] = {0.0};
+
+static uint8_t raw_output_tensor_buf[ALGO_RAW_OUT_BLOCK_SIZE] = {0};
+static size_t raw_output_tensor_size = 0U;
 
 constexpr int H = IMAGE_HEIGHT;
 
@@ -845,6 +852,8 @@ void log_mem_status(RunnerContext& ctx) {
 void print_outputs(RunnerContext& ctx)
 {
     std::vector<EValue> outputs(ctx.method.value()->outputs_size());
+    raw_output_tensor_size = 0U;
+    memset(raw_output_tensor_buf, 0, sizeof(raw_output_tensor_buf));
 
     Error status =
         ctx.method.value()->get_outputs(outputs.data(), outputs.size());
@@ -864,8 +873,33 @@ void print_outputs(RunnerContext& ctx)
         }
 
         postprocess_data_t result = {0};
-        const float* logits = tensor.const_data_ptr<float>();
         int numel = tensor.numel();
+        const void *raw_tensor_data = nullptr;
+        size_t raw_tensor_size = 0U;
+
+        if (tensor.scalar_type() == ScalarType::Float) {
+            raw_tensor_data = tensor.const_data_ptr<float>();
+            raw_tensor_size = (size_t)numel * sizeof(float);
+        } else {
+            raw_tensor_data = tensor.const_data_ptr<int8_t>();
+            raw_tensor_size = (size_t)numel * sizeof(int8_t);
+        }
+
+        if (raw_tensor_data != nullptr) {
+            size_t remaining = sizeof(raw_output_tensor_buf) - raw_output_tensor_size;
+            size_t copy_size = (raw_tensor_size <= remaining) ? raw_tensor_size : remaining;
+
+            if (copy_size > 0U) {
+                memcpy(&raw_output_tensor_buf[raw_output_tensor_size], raw_tensor_data, copy_size);
+                raw_output_tensor_size += copy_size;
+            }
+        }
+
+        if (tensor.scalar_type() != ScalarType::Float) {
+            continue;
+        }
+
+        const float* logits = tensor.const_data_ptr<float>();
 
         // Safety check
         if (numel != MODEL_NUM_CLASSES) {
@@ -952,16 +986,10 @@ void postprocess(RunnerContext& ctx, uint8_t* img_buf,
     /* Decode output tensor → output_label, conf_int, classify_object */
     print_outputs(ctx);
 
-    /* Copy shortened label plus confidence into caller's output buffer */
-#if OUTPUT_PREDICTION_METADATA
-    if (out_num >= sizeof(output_label_t)) {
-        memcpy(out_buf, &output_label, sizeof(output_label));
-    }
-#else
+    /* Copy class confidence scores into caller's output buffer. */
     if (out_num >= sizeof(class_probs)) {
         memcpy(out_buf, class_probs, sizeof(class_probs));
     }
-#endif
 
     /* Only draw if label is valid */
     if (output_label.label_name[0] != '\0')
@@ -973,6 +1001,40 @@ void postprocess(RunnerContext& ctx, uint8_t* img_buf,
 
         DrawClassLabelOnImage(img_buf, img_width, img_height, output_string);
     }
+}
+
+/**
+  \fn           size_t copy_result_metadata (uint8_t *out_buf, size_t out_num)
+  \brief        Copy algorithm result metadata to the output buffer.
+  \param[out]   out_buf         pointer to memory buffer for returning algorithm result metadata
+  \param[in]    out_num         number of data bytes available in output buffer (in bytes)
+  \return       number of metadata bytes copied on success; 0 on error
+*/
+size_t copy_result_metadata(uint8_t *out_buf, size_t out_num) {
+    if (out_buf == nullptr || out_num < sizeof(output_label)) {
+        return 0U;
+    }
+
+    memset(out_buf, 0, out_num);
+    memcpy(out_buf, &output_label, sizeof(output_label));
+    return sizeof(output_label);
+}
+
+/**
+  \fn           size_t copy_raw_output_tensor (uint8_t *out_buf, size_t out_num)
+  \brief        Copy raw output tensor bytes to the output buffer.
+  \param[out]   out_buf         pointer to memory buffer for returning raw output tensor bytes
+  \param[in]    out_num         number of data bytes available in output buffer (in bytes)
+  \return       number of raw tensor bytes copied on success; 0 on error
+*/
+size_t copy_raw_output_tensor(uint8_t *out_buf, size_t out_num) {
+    if (out_buf == nullptr || out_num < raw_output_tensor_size) {
+        return 0U;
+    }
+
+    memset(out_buf, 0, out_num);
+    memcpy(out_buf, raw_output_tensor_buf, raw_output_tensor_size);
+    return raw_output_tensor_size;
 }
 
 void write_etdump(RunnerContext& ctx) {}

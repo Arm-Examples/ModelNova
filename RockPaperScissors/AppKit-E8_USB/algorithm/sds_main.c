@@ -24,6 +24,7 @@
 #include "data_in.h"
 #include "app_setup.h"
 
+#define SDS_FLAG_RECORD_EXTRA_OUTPUTS  (1UL << 5)
 
 // SDS system state consistent with main AlgorithmThread loop
 uint32_t sds_state = SDS_STATE_INACTIVE;
@@ -35,18 +36,24 @@ uint32_t timeslot = 0U;
 uint8_t record_camera = 0U;
 
 // Algorithm input/output data buffer
-static uint8_t algo_data_in_buf [ALGO_DATA_IN_BLOCK_SIZE]  __ALIGNED(4);
-static uint8_t algo_data_out_buf[ALGO_DATA_OUT_BLOCK_SIZE] __ALIGNED(4);
+static uint8_t algo_data_in_buf       [ALGO_DATA_IN_BLOCK_SIZE]     __ALIGNED(4);
+static uint8_t algo_data_out_buf      [ALGO_DATA_OUT_BLOCK_SIZE]    __ALIGNED(4);
+static uint8_t algo_result_out_buf    [ALGO_RESULT_OUT_BLOCK_SIZE]  __ALIGNED(4);
+static uint8_t algo_raw_out_buf       [ALGO_RAW_OUT_BLOCK_SIZE]     __ALIGNED(4);
 
 // SDS buffers
-static uint8_t sds_camera_buf  [CAMERA_FRAME_SIZE              + 2048] __ALIGNED(4);
-static uint8_t sds_data_in_buf [ALGO_DATA_IN_BLOCK_SIZE        + 2048] __ALIGNED(4);
-static uint8_t sds_data_out_buf[(ALGO_DATA_OUT_BLOCK_SIZE * 2) + 2048] __ALIGNED(4);
+static uint8_t sds_camera_buf     [CAMERA_FRAME_SIZE                  + 2048] __ALIGNED(4);
+static uint8_t sds_data_in_buf    [ALGO_DATA_IN_BLOCK_SIZE            + 2048] __ALIGNED(4);
+static uint8_t sds_data_out_buf   [(ALGO_DATA_OUT_BLOCK_SIZE * 2)     + 2048] __ALIGNED(4);
+static uint8_t sds_result_out_buf [(ALGO_RESULT_OUT_BLOCK_SIZE * 2)   + 2048] __ALIGNED(4);
+static uint8_t sds_raw_out_buf    [(ALGO_RAW_OUT_BLOCK_SIZE * 2)      + 2048] __ALIGNED(4);
 
 // SDS stream identifiers
-       sdsId_t sds_camera_id   = NULL;
-static sdsId_t sds_data_in_id  = NULL;
-static sdsId_t sds_data_out_id = NULL;
+       sdsId_t sds_camera_id     = NULL;
+static sdsId_t sds_data_in_id    = NULL;
+static sdsId_t sds_data_out_id   = NULL;
+static sdsId_t sds_result_out_id = NULL;
+static sdsId_t sds_raw_out_id    = NULL;
 
 // Recording/playback mode text
 static const char *SDS_MODE[] = { "recording", "playback" };
@@ -62,6 +69,7 @@ int32_t OpenStreams (void) {
   int32_t status = 0;
   uint8_t play = 0U;
   uint8_t camera_fail = 0U;
+  uint8_t extra_outs_fail = 0U;
 
   if ((sdsFlags & SDS_FLAG_PLAYBACK) != 0U) {   // If open for playback requested
     play = 1U;
@@ -96,7 +104,23 @@ int32_t OpenStreams (void) {
   SDS_ASSERT(sds_data_in_id  != NULL);
   SDS_ASSERT(sds_data_out_id != NULL);
 
-  if ((camera_fail == 0U) && (sds_data_in_id != NULL) && (sds_data_out_id != NULL)) {
+  // Optional output streams are session-level streams. Flag F must be set before start.
+  if ((sdsFlags & SDS_FLAG_RECORD_EXTRA_OUTPUTS) != 0U) {
+    sdsFlagsModify(0U, SDS_FLAG_RECORD_EXTRA_OUTPUTS);
+
+    sds_result_out_id = sdsOpen("ML_Result", sdsModeWrite, sds_result_out_buf, sizeof(sds_result_out_buf));
+    sds_raw_out_id    = sdsOpen("ML_RawOutput", sdsModeWrite, sds_raw_out_buf, sizeof(sds_raw_out_buf));
+
+    SDS_ASSERT(sds_result_out_id != NULL);
+    SDS_ASSERT(sds_raw_out_id    != NULL);
+
+    if ((sds_result_out_id == NULL) || (sds_raw_out_id == NULL)) {
+      extra_outs_fail = 1U;
+    }
+  }
+
+  if ((camera_fail == 0U) && (extra_outs_fail == 0U) &&
+      (sds_data_in_id != NULL) && (sds_data_out_id != NULL)) {
     SDS_PRINTF("==== SDS %s started\n", SDS_MODE[play]);
   } else {
     sdsState = SDS_STATE_END;       // If files could not be opened then request streaming end
@@ -144,6 +168,24 @@ int32_t CloseStreams (void) {
     SDS_ERROR_CHECK(close_status);
     if (close_status == SDS_OK) {
       sds_data_out_id = NULL;
+    } else {
+      status = -1;
+    }
+  }
+  if (sds_result_out_id != NULL) {
+    close_status = sdsClose(sds_result_out_id);
+    SDS_ERROR_CHECK(close_status);
+    if (close_status == SDS_OK) {
+      sds_result_out_id = NULL;
+    } else {
+      status = -1;
+    }
+  }
+  if (sds_raw_out_id != NULL) {
+    close_status = sdsClose(sds_raw_out_id);
+    SDS_ERROR_CHECK(close_status);
+    if (close_status == SDS_OK) {
+      sds_raw_out_id = NULL;
     } else {
       status = -1;
     }
@@ -247,6 +289,33 @@ __NO_RETURN void AlgorithmThread (void *argument) {
         }
       } while (ret == SDS_NO_SPACE);
       SDS_ASSERT(ret == sizeof(algo_data_out_buf));
+
+      if ((sds_result_out_id != NULL) && (sds_raw_out_id != NULL)) {
+        if (GetAlgorithmResultMetadata(algo_result_out_buf, sizeof(algo_result_out_buf)) != 0) {
+          continue;
+        }
+        if (GetAlgorithmRawOutputTensor(algo_raw_out_buf, sizeof(algo_raw_out_buf)) != 0) {
+          continue;
+        }
+
+        // Record prediction result metadata
+        do {
+          ret = sdsWrite(sds_result_out_id, timeslot, algo_result_out_buf, sizeof(algo_result_out_buf));
+          if (ret == SDS_NO_SPACE) {
+            osDelay(1U);
+          }
+        } while (ret == SDS_NO_SPACE);
+        SDS_ASSERT(ret == sizeof(algo_result_out_buf));
+
+        // Record raw output tensor
+        do {
+          ret = sdsWrite(sds_raw_out_id, timeslot, algo_raw_out_buf, sizeof(algo_raw_out_buf));
+          if (ret == SDS_NO_SPACE) {
+            osDelay(1U);
+          }
+        } while (ret == SDS_NO_SPACE);
+        SDS_ASSERT(ret == sizeof(algo_raw_out_buf));
+      }
     }
   }
 }
