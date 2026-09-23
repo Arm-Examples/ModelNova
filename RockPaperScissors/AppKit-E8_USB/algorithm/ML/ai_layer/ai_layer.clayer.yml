@@ -3,26 +3,21 @@ layer:
   description: Machine Learning layer for the Rock-Paper-Scissors game, utilizing a pre-trained model for inference on an Ethos-U NPU.
 
   packs:
-    - pack: PyTorch::ExecuTorch
-      path: ../../../../../packs/PyTorch.ExecuTorch.1.1.0-rc1-build.12
+    - pack: PyTorch::ExecuTorch@1.4.1
 
   define:
     - ET_LOG_ENABLED : 0
 
   components:
-    # ExecuTorch core runtime
-    - component: Machine Learning:ExecuTorch:Runtime
-    - component: Machine Learning:ExecuTorch:Kernel Utils
-    - component: Machine Learning:ExecuTorch:Kernel Registration
-    # Ethos-U NPU backend
-    - component: Machine Learning:ExecuTorch:Backend EthosU
-    # Bare-metal PAL stubs (replaces posix.cpp)
-    - component: Machine Learning:ExecuTorch:Platform Bare-Metal
-    # Random op stubs (no std::random_device on bare-metal)
-    - component: Machine Learning:ExecuTorch:Stubs RandomOps
-    # Quantized operators used by the RPS model
-    - component: Machine Learning:ExecuTorch:Operators Quantized quantize
-    - component: Machine Learning:ExecuTorch:Operators Quantized dequantize
+      # ExecuTorch core runtime (Runtime ships the weak bare-metal PAL).
+      - component: Machine Learning:ExecuTorch:Runtime
+      - component: Machine Learning:ExecuTorch:Kernel Utils
+      - component: Machine Learning:ExecuTorch:Kernel Registration
+      # Ethos-U NPU backend (the model is fully delegated to it).
+      - component: Machine Learning:ExecuTorch:Backend EthosU
+      # Quantized reference operators.
+      - component: Machine Learning:ExecuTorch Operators:Quantized dequantize
+      - component: Machine Learning:ExecuTorch Operators:Quantized quantize
 
   groups:
     # AI Model - replace this group with a ModelNova-generated model pack
@@ -30,4 +25,3 @@ layer:
       files:
         - file: ./model/model_pte.h
         - file: ./model/REPORT.md
-
