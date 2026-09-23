@@ -66,11 +66,6 @@ jobs:
           key: ModelNova
           path: /home/runner/.cache/arm/packs/.Download
 
-      - name: Add Beta packs
-        working-directory: ./
-        run: |
-          cpackget add ./packs/PyTorch.ExecuTorch.1.1.0-rc1-build.12/PyTorch.ExecuTorch.pdsc --agree-embedded-license
-
       - name: ${{matrix.context.tool}} Build-Test for context ${{matrix.context.proj}}.${{matrix.context.build-type}}+${{matrix.context.target-type}}
         working-directory: ${{matrix.context.dir}}
         run: |
