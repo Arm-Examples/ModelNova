@@ -119,7 +119,7 @@ int32_t OpenStreams (void) {
     }
   }
 
-  if ((status == 0) && (camera_fail == 0U) && (extra_outs_fail == 0U) &&
+  if ((camera_fail == 0U) && (extra_outs_fail == 0U) &&
       (sds_data_in_id != NULL) && (sds_data_out_id != NULL)) {
     SDS_PRINTF("==== SDS %s started\n", SDS_MODE[play]);
   } else {
