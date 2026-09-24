@@ -36,12 +36,32 @@ typedef enum {
     DATATYPE_INT8
 }datatype_t;
 
+/** @brief Maximum number of detections supported by postprocess. */
+#define MAX_DETECTIONS 100
+
 /** @brief Single detection with bounding box, score, and class id. */
 typedef struct {
     uint16_t class_id;
     float score;
     uint16_t x1, y1, x2, y2;
 } detection_t;
+
+/** @brief Maximum number of keypoints per person. */
+#define POSE_MAX_KEYPOINTS  17
+
+/** @brief A single detected keypoint with (x, y, score). */
+typedef struct {
+    float x;        /**< X coordinate in model space (before image mapping) */
+    float y;        /**< Y coordinate in model space (before image mapping) */
+    float score;    /**< Confidence score [0..1] */
+} keypoint_t;
+
+/** @brief Pose result for a single person. */
+typedef struct {
+    uint8_t valid;                  /**< 1 if pose is valid, 0 otherwise */
+    uint16_t num_keypoints;         /**< Number of valid keypoints */
+    keypoint_t keypoints[POSE_MAX_KEYPOINTS]; /**< Keypoint array */
+} pose_result_t;
 
 /** @brief Output data structure for postprocess results. */
 typedef struct {
@@ -61,6 +81,17 @@ typedef struct {
     
     int original_width;   
     int original_height;
+
+    /* Pose estimation fields */
+    pose_result_t *pose_result;     /**< Pointer to pose result struct to populate */
+    int pose_num_keypoints;         /**< Expected number of keypoints (e.g. 17) */
+    float split_ratio;              /**< SimCC split ratio (default 2.0) */
+    int simcc_x_length;             /**< X axis SimCC length per keypoint */
+    int simcc_y_length;             /**< Y axis SimCC length per keypoint */
+    int argmax_indices_x[POSE_MAX_KEYPOINTS]; /**< Argmax results for X axis */
+    int argmax_indices_y[POSE_MAX_KEYPOINTS]; /**< Argmax results for Y axis */
+    float argmax_scores_x[POSE_MAX_KEYPOINTS]; /**< Softmax scores for X axis */
+    float argmax_scores_y[POSE_MAX_KEYPOINTS]; /**< Softmax scores for Y axis */
 } postprocess_data_t;
 
 /**
