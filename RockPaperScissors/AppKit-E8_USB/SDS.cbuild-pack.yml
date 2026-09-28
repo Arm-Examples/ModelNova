@@ -31,6 +31,10 @@ cbuild-pack:
     - resolved-pack: Keil::MDK-Middleware@8.3.0
       selected-by-pack:
         - Keil::MDK-Middleware@^8.0.0
+    - resolved-pack: PyTorch::ExecuTorch@1.4.1
+      selected-by-pack:
+        - PyTorch::ExecuTorch
+        - PyTorch::ExecuTorch@1.4.1
     - resolved-pack: SEGGER::RTT@8.58.0
       selected-by-pack:
         - SEGGER::RTT@^8.58.0
