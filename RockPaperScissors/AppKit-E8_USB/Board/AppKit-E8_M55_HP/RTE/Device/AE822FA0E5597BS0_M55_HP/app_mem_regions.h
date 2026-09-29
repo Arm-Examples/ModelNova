@@ -30,7 +30,7 @@
 //   <o> RTSS HP Region size [bytes] <0x0-0x00580000:8>
 //   <i> Defines size of RTSS HP application memory region.
 //   <i> Default: 0x00200000
-#define APP_MRAM_HP_SIZE       0x00400000
+#define APP_MRAM_HP_SIZE       0x00380000
 // </h>
 
 // <h>MRAM User Configuration
