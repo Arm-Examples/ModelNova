@@ -3,7 +3,7 @@ layer:
   description: Machine Learning layer for the Rock-Paper-Scissors game, utilizing a pre-trained model for inference on an Ethos-U NPU.
 
   packs:
-    - pack: PyTorch::ExecuTorch@1.4.1
+    - pack: PyTorch::ExecuTorch@^1.5.1
 
   define:
     - ET_LOG_ENABLED : 0

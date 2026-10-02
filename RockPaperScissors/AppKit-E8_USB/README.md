@@ -14,8 +14,10 @@ To run this example:
     - `https://github.com/ARM-software/SDS-Framework/releases`
 - Setup the [Python environment](https://arm-software.github.io/SDS-Framework/main/utilities.html#setup) for running
   the SDS Utilities.
-- Install Alif Ensemble CMSIS DFP pack v2.2.0 or later with:
-    - `cpackget add AlifSemiconductor::Ensemble@2.2.0`
+- Install ExecuTorch pack v1.5.1 or later with:
+    - `cpackget add PyTorch::ExecuTorch@1.5.1`
+- Install Alif Ensemble CMSIS DFP pack v2.2.1 or later with:
+    - `cpackget add AlifSemiconductor::Ensemble@2.2.1`
 
 ## Alif AppKit-E8-AIML
 

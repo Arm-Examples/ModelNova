@@ -3,11 +3,8 @@
 
 #include "app_mem_regions.h"
 
-#define __ROM_BASE      APP_OSPI_FLASH_HP_BASE
-#define __ROM_SIZE      APP_OSPI_FLASH_HP_SIZE
-
-#define __ITCM_BASE     APP_ITCM_BASE
-#define __ITCM_SIZE     APP_HP_ITCM_SIZE
+#define __ROM_BASE      APP_ITCM_BASE
+#define __ROM_SIZE      APP_HP_ITCM_SIZE
 
 #define __RAM_BASE      APP_DTCM_BASE
 #define __RAM_SIZE      APP_HP_DTCM_SIZE
@@ -21,7 +18,8 @@
  *----------------------------------------------------------------------------*/
 #define __STACK_TOP     (__RAM_BASE + __RAM_SIZE)    /* starts at end of RAM */
 #define __HEAP_BASE     (AlignExpr(+0, 8))           /* starts after RW_RAM section, 8 byte aligned */
-#define __APP_HEAP_BASE (AlignExpr(+0, 8))           /* starts after HEAP, 8 byte aligned */
+#define __APP_HEAP_BASE (AlignExpr(+0, 8)) 	     /* starts after HEAP, 8 byte aligned */
+
 
 /*----------------------------------------------------------------------------
   Scatter File Definitions definition
@@ -30,12 +28,12 @@
 #define __RW_BASE       __RAM_BASE
 #define __RW_SIZE      (__RAM_SIZE - __STACK_SIZE - __HEAP_SIZE - __APP_HEAP_SIZE)
 
-LR_ROM __ROM_BASE NOCOMPRESS __ROM_SIZE  {    ; load region size_region
+LR_ROM __ROM_BASE __ROM_SIZE  {    ; load region size_region
   ER_ROM_VECTORS  (AlignExpr(__ROM_BASE, 2048))  {   ; Vector Table
     *vectors.o (RESET, +First)
   }
 
-  ER_ROM (AlignExpr(+0, 8)) {                 ; load address = execution address
+  ER_ROM  (AlignExpr(+0, 8))  {                     ; load address = execution address
    *(InRoot$$Sections)
 
    ; These should be part of primary load region
@@ -51,10 +49,6 @@ LR_ROM __ROM_BASE NOCOMPRESS __ROM_SIZE  {    ; load region size_region
    .ANY (+XO)
   }
 
-  ITCM_RAM __ITCM_BASE __ITCM_SIZE  {                     ; RW code
-   ; Specify objects intended to execute out of ITCM
-  }
-
   RW_RAM __RW_BASE __RW_SIZE  {                     ; RW data
    .ANY (+RW +ZI)
   }
@@ -64,6 +58,11 @@ LR_ROM __ROM_BASE NOCOMPRESS __ROM_SIZE  {    ; load region size_region
     * (usb_dma_buf)
     * (sd_dma_buf)
     * (.driver.usbd0)
+    * (.rodata.usbd0_device_descriptor)
+    * (.rodata.usbd0_device_qualifier_hs)
+    * (.rodata.usbd0_config_descriptor_hs)
+    * (.rodata.usbd0_other_speed_config_descriptor_hs)
+    * (.rodata.usbd0_string_descriptor)
   }
 
   NS_REGION_0_PAD  (AlignExpr(ImageLimit(NS_REGION_0), TGU_BLOCK_SIZE)) { ; Non secure region 0 Padding
@@ -94,6 +93,7 @@ LR_ROM __ROM_BASE NOCOMPRESS __ROM_SIZE  {    ; load region size_region
    * (.bss.lcd_frame_buf)                 ; LCD frame Buffer.
    * (.bss.camera_frame_buf)              ; Camera Frame Buffer
    * (.bss.camera_frame_bayer_to_rgb_buf) ; (Optional) Camera Frame Buffer for Bayer to RGB Conversion.
+   * (.data.audio_samples)                ; Audio sample data
   }
 
   /*
@@ -106,9 +106,5 @@ LR_ROM __ROM_BASE NOCOMPRESS __ROM_SIZE  {    ; load region size_region
   RW_SRAM1 APP_SRAM1_BASE APP_SRAM1_SIZE  {  ; Update sections as needed
 
   }
-
 #endif
-  PADDING +0 OVERLAY ALIGN 16 FILL 0 16
-  {
-  }
 }
