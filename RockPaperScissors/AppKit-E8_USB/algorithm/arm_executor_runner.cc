@@ -505,17 +505,21 @@ static void FormatShortLabel(const char* label, char* short_label,
  * \param[out] probs  Pointer to output probability array
  * \param[in]  n      Number of elements
  */
-void softmax(const float* logits, float* probs, int n) {
-    float max_val = logits[0];
+template <typename T>
+void softmax(const T* logits, float* probs, int n,
+             float scale = 1.0f, int zero_point = 0) {
+    float max_val = ((float)logits[0] - (float)zero_point) * scale;
     for (int i = 1; i < n; i++) {
-        if (logits[i] > max_val) {
-            max_val = logits[i];
+        float val = ((float)logits[i] - (float)zero_point) * scale;
+        if (val > max_val) {
+            max_val = val;
         }
     }
 
     float sum = 0.0f;
     for (int i = 0; i < n; i++) {
-        probs[i] = expf(logits[i] - max_val);
+        float val = ((float)logits[i] - (float)zero_point) * scale;
+        probs[i] = expf(val - max_val);
         sum += probs[i];
     }
 
@@ -869,9 +873,11 @@ void print_outputs(RunnerContext& ctx)
         Tensor tensor = outputs[i].toTensor();
 
         if (tensor.scalar_type() != ScalarType::Float && tensor.scalar_type() != ScalarType::Char) {
+            printf("Classification output[%d] must be float or int8, got scalar type %d\n",
+                   i, static_cast<int>(tensor.scalar_type()));
             continue;
         }
-
+        
         postprocess_data_t result = {0};
         int numel = tensor.numel();
         const void *raw_tensor_data = nullptr;
@@ -895,22 +901,33 @@ void print_outputs(RunnerContext& ctx)
             }
         }
 
-        if (tensor.scalar_type() != ScalarType::Float) {
-            continue;
-        }
-
-        const float* logits = tensor.const_data_ptr<float>();
-
         // Safety check
         if (numel != MODEL_NUM_CLASSES) {
             printf("Error: Output class count mismatch!\n");
             printf("Number of classes: %d, expected: %d\n", numel, MODEL_NUM_CLASSES);
         }
 
+        int predicted_idx = -1;
         float confidence = 0.0f;
-        uint16_t predicted_idx = -1;
-        softmax(logits, class_probs, numel);
-        status_t postprocess_result = postprocess((float*)logits, &result);
+        void* logits = nullptr;
+
+        if (tensor.scalar_type() == ScalarType::Float) {
+            const float* data = tensor.const_data_ptr<float>();
+            logits = (void*)data;
+            softmax(data, class_probs, numel);
+            result.scale = 0.0f;
+            result.zero_point = 0;
+        } else {
+            const int8_t* data = tensor.const_data_ptr<int8_t>();
+            logits = (void*)data;
+            softmax(data, class_probs, numel,
+                    MODEL_OUTPUT_SCALE,
+                    MODEL_OUTPUT_ZERO_POINT);
+            result.scale = MODEL_OUTPUT_SCALE;
+            result.zero_point = MODEL_OUTPUT_ZERO_POINT;
+        }
+
+        status_t postprocess_result = postprocess(logits, &result);
 
         if(postprocess_result != STATUS_OK){
             printf("Post-Process failed");
