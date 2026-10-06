@@ -15,9 +15,6 @@ layer:
       - component: Machine Learning:ExecuTorch:Kernel Registration
       # Ethos-U NPU backend (the model is fully delegated to it).
       - component: Machine Learning:ExecuTorch:Backend EthosU
-      # Quantized reference operators.
-      - component: Machine Learning:ExecuTorch Operators:Quantized dequantize
-      - component: Machine Learning:ExecuTorch Operators:Quantized quantize
 
   groups:
     # AI Model - replace this group with a ModelNova-generated model pack
