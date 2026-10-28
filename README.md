@@ -1,6 +1,5 @@
 [![Build and Run RPS on Simulator](https://github.com/Arm-Examples/ModelNova/actions/workflows/Test_RPS_SSE-320-U85.yml/badge.svg)](https://github.com/Arm-Examples/ModelNova/actions/workflows/Test_RPS_SSE-320-U85.yml)
-[![Build RPS for AppKit-E8 Hardware](https://github.com/Arm-Examples/ModelNova/actions/workflows/Build_RPS_AppKit-E8.yml/badge.svg)](https://github.com/Arm-Examples/ModelNova/actions/workflows/Build_RPS_AppKit-E8.yml)
-[![Run RPS on AppKit-E8 Hardware](https://github.com/Arm-Examples/ModelNova/actions/workflows/Run_RPS_AppKit-E8.yml/badge.svg)](https://github.com/Arm-Examples/ModelNova/actions/workflows/Run_RPS_AppKit-E8.yml)
+[![Build and RunRPS for AppKit-E8 Hardware](https://github.com/Arm-Examples/ModelNova/actions/workflows/Build_RPS_AppKit-E8.yml/badge.svg)](https://github.com/Arm-Examples/ModelNova/actions/workflows/Build_RPS_AppKit-E8.yml)
 [![Build RPS Context Variants](https://github.com/Arm-Examples/ModelNova/actions/workflows/Build_RPS_Variants.yml/badge.svg)](https://github.com/Arm-Examples/ModelNova/actions/workflows/Build_RPS_Variants.yml)
 
 **Work in Progress**
