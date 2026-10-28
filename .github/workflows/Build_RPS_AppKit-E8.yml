@@ -49,11 +49,6 @@ jobs:
           cpackget init https://www.keil.com/pack/index.pidx
           cpackget update-index
 
-      - name: Add Beta packs
-        working-directory: ./
-        run: |
-          cpackget add ./packs/PyTorch.ExecuTorch.1.1.0-rc1-build.12/PyTorch.ExecuTorch.pdsc --agree-embedded-license
-
       - name: Build the target-set
         working-directory: ./RockPaperScissors/AppKit-E8_USB
         run: |

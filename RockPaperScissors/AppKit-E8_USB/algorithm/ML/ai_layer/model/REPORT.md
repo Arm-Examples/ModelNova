@@ -1,67 +1,83 @@
-
-## 🔄 Model Conversion Details
+## Model Conversion Details
 
 ### Selected Operators
 
-**Source:** Model file: alif_sensor_25epochs.pth (SqueezeNet RPS Classification)
+**Source:** Model file: `rps_alif_model.pth` (int8 RPS SqueezeNet Classification)
 
-**Count:** 48 NPU operators (excluding CPU quantize/dequantize wrapper)
+**Count:** 31 NPU operators (100.0% delegated; CPU operators = 0)
 
-```
+The generated export did not emit a separate selected-operator list. The Vela
+summary confirms full NPU delegation, and the SqueezeNet image-classification
+graph uses the following operator families:
+
+```text
 Conv2D, MaxPool, Clamp, MemoryCopy, AvgPool
-quantized_decomposed::dequantize_per_tensor.out (wrapper)
-quantized_decomposed::quantize_per_tensor.out (wrapper)
 ```
 
 **Ethos-U Compile Specification:**
-  - target: ethos-u85-256
-  - system_config: Ethos_U85_SRAM_MRAM
-  - memory_mode: Shared_Sram
-  - extra_flags: --output-format=raw, --debug-force-regor, --verbose-all
+  - target: `ethos-u85-256`
+  - system_config: `ETHOS_U85_SRAM_MRAM`
+  - memory_mode: `SHARED_SRAM`
+  - accelerator configuration: `Ethos_U85_256`
+  - ethos-u-vela: `5.1.0`
+  - extra_flags: `--optimise=Size`
 
 **Quantization Configuration:**
-  - Using EthosUQuantizer with symmetric quantization
-  - Post-training quantization enabled
+  - Model type: int8 input/output RPS SqueezeNet Classification
+  - Quantization flow: post-training int8 quantization for Ethos-U delegate
+  - Calibration set: 996 images
+  - Input/output quantization folded into the delegate
+  - On-device input formula:
+
+```text
+int8_input = clip(round(float_input / input_scale) + input_zero_point, -128, 127)
+float_output = (int8_output - output_zero_point) * output_scale
+```
+
+**I/O Quantization Parameters:**
+  - Input type: `int8`
+  - Input scale: `0.018649335950613022`
+  - Input zero_point: `-14`
+  - Output type: `int8`
+  - Output scale: `4.433094024658203`
+  - Output zero_point: `-128`
 
 **Model Architecture:**
-  - Model class: SqueezeNet (RPS Classification)
-  - Input: f32[1, 3, 224, 224] (RGB images, 224x224)
-  - Output: f32[1, 4] (4-class classifier: Rock, Paper, Scissors, Background)
+  - Model class: SqueezeNet 1.1 (RPS Classification)
+  - Model alias: `squeezenet-classification`
+  - Category: Image Classification
+  - Input: `f32[1, 3, 224, 224]` before int8 delegate quantization
+  - Output: `int8[1, 4]` logits/scores after delegate execution
+  - Classes: `PAPER`, `ROCK`, `SCISSOR`, `UNKNOWN`
+  - Classifier: convolution classifier at `classifier[1]`
   - Key layers: Conv2D (3x3, 1x1), Fire modules with squeeze/expand, MaxPool, AvgPool
 
 **Vela Compilation Summary:**
   - Accelerator configuration               Ethos_U85_256
-  - System configuration             Ethos_U85_SRAM_MRAM
-  - Memory mode                               Shared_Sram
+  - System configuration              ETHOS_U85_SRAM_MRAM
+  - Memory mode                               SHARED_SRAM
   - Accelerator clock                                 400 MHz
   - Design peak SRAM bandwidth                      11.92 GB/s
   - Design peak Off-chip Flash bandwidth             0.72 GB/s
-  - Total SRAM used                                960.27 KiB
-  - Total Off-chip Flash used                     747.66 KiB
+  - Total SRAM used                                924.02 KiB
+  - Total Off-chip Flash used                      747.64 KiB
   - CPU operators = 0 (0.0%)
-  - NPU operators = 48 (100.0%)
-  - Average SRAM bandwidth                           1.67 GB/s
-  - Input   SRAM bandwidth                          11.68 MB/batch
-  - Weight  SRAM bandwidth                           4.18 MB/batch
-  - Output  SRAM bandwidth                           5.06 MB/batch
-  - Total   SRAM bandwidth                          21.26 MB/batch
-  - Total   SRAM bandwidth            per input     21.26 MB/inference (batch size 1)
-  - Average Off-chip Flash bandwidth                 0.06 GB/s
+  - NPU operators = 31 (100.0%)
+  - Average SRAM bandwidth                           3.18 GB/s
+  - Input   SRAM bandwidth                          12.41 MB/batch
+  - Weight  SRAM bandwidth                           4.16 MB/batch
+  - Output  SRAM bandwidth                           3.38 MB/batch
+  - Total   SRAM bandwidth                          20.29 MB/batch
+  - Total   SRAM bandwidth            per input     20.29 MB/inference (batch size 1)
+  - Average Off-chip Flash bandwidth                 0.12 GB/s
   - Input   Off-chip Flash bandwidth                 0.00 MB/batch
-  - Weight  Off-chip Flash bandwidth                 0.73 MB/batch
+  - Weight  Off-chip Flash bandwidth                 0.76 MB/batch
   - Output  Off-chip Flash bandwidth                 0.00 MB/batch
-  - Total   Off-chip Flash bandwidth                 0.73 MB/batch
-  - Total   Off-chip Flash bandwidth  per input      0.73 MB/inference (batch size 1)
-  - Original Weights Size                          704.69 KiB
-  - NPU Encoded Weights Size                       718.75 KiB
-  - Neural network macs                        267693188 MACs/batch
-  - Info: The numbers below are internal compiler estimates.
-  - For performance numbers the compiled network should be run on an FVP Model or FPGA.
-  - Network Tops/s                                   0.04 Tops/s
-  - NPU cycles                                   5075829 cycles/batch
-  - SRAM Access cycles                            674460 cycles/batch
-  - DRAM Access cycles                                  0 cycles/batch
-  - On-chip Flash Access cycles                         0 cycles/batch
-  - Off-chip Flash Access cycles                  389938 cycles/batch
-  - Total cycles                                  5083373 cycles/batch
-  - Batch Inference time                12.71 ms, 78.69 inferences/s (batch size 1)
+  - Total   Off-chip Flash bandwidth                 0.76 MB/batch
+  - Total   Off-chip Flash bandwidth  per input      0.76 MB/inference (batch size 1)
+  - Neural network macs                         266091495 MACs/batch
+
+**Generated Artifacts:**
+  - `model.pte`: 785,216 bytes
+  - `model_pte.h`: generated C header for the ExecuTorch model
+  - `model_config.h`: int8 quantization and label configuration

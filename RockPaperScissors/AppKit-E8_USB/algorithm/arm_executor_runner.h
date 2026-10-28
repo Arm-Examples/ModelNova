@@ -117,4 +117,25 @@ bool run_inference(RunnerContext &ctx);
 void postprocess(RunnerContext &ctx, uint8_t *img_buf, uint32_t img_width, uint32_t img_height,
                  uint8_t *out_buf, uint32_t out_num);
 
+/**
+ * \brief Copy the latest classification metadata for the result SDS stream.
+ *
+ * The destination buffer is cleared first so callers may use a fixed-size stream
+ * block that is larger than classification_result_t.
+ *
+ * \param[out] out_buf  Destination buffer.
+ * \param[in]  out_num  Destination buffer size in bytes.
+ * \return Number of bytes copied from classification_result_t, or 0 on error.
+ */
+size_t copy_result_metadata(uint8_t *out_buf, size_t out_num);
+
+/**
+  \fn           size_t copy_raw_output_tensor (uint8_t *out_buf, size_t out_num)
+  \brief        Copy raw output tensor bytes to the output buffer.
+  \param[out]   out_buf         pointer to memory buffer for returning raw output tensor bytes
+  \param[in]    out_num         number of data bytes available in output buffer (in bytes)
+  \return       number of raw tensor bytes copied on success; 0 on error
+*/
+size_t copy_raw_output_tensor(uint8_t *out_buf, size_t out_num);
+
 #endif /* ARM_EXECUTOR_RUNNER_H */

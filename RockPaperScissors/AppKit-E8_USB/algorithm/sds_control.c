@@ -38,7 +38,8 @@ osThreadAttr_t attrAlgorithmThread = {
 
 // sdsControlThread thread attributes
 osThreadAttr_t attr_sdsControlThread = {
-  .name = "sdsControl"
+  .name = "sdsControl",
+  .priority = osPriorityNormal1
 };
 
 // Idle time counter

@@ -304,3 +304,26 @@ int32_t ExecuteAlgorithm(uint8_t *in_buf, uint32_t in_num,
 
     return 0;
 }
+
+/**
+  \fn           int32_t GetAlgorithmResultMetadata (uint8_t *out_buf, uint32_t out_num)
+  \brief        Get algorithm result metadata.
+  \param[out]   out_buf         pointer to memory buffer for returning algorithm result metadata
+  \param[in]    out_num         maximum number of data bytes available in output buffer (in bytes)
+  \return       0 on success; -1 on error
+*/
+int32_t GetAlgorithmResultMetadata(uint8_t *out_buf, uint32_t out_num) {
+    if (copy_result_metadata(out_buf, out_num) == 0U) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int32_t GetAlgorithmRawOutputTensor(uint8_t *out_buf, uint32_t out_num) {
+    if (copy_raw_output_tensor(out_buf, out_num) == 0U) {
+        return -1;
+    }
+    
+    return 0;
+}

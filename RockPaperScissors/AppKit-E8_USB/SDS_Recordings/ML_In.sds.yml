@@ -1,11 +1,9 @@
 sds:
   name: ML input
   description: RGB888 video frames from camera
-  frequency: 8.33
+  sample-frequency: 8.33
   content:
-    - value: Frame
-      type: uint8_t
-      image:
+    - image:
         pixel_format: RGB888
         width: 224
         height: 224

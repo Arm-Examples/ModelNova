@@ -4,7 +4,7 @@
 #include "app_mem_regions.h"
 
 #define __ROM_BASE      APP_MRAM_HP_BASE
-#define __ROM_SIZE      APP_MRAM_HP_SIZE
+#define __ROM_SIZE      APP_CODE_MRAM_SIZE
 
 #define __ITCM_BASE     APP_ITCM_BASE
 #define __ITCM_SIZE     APP_HP_ITCM_SIZE
@@ -18,14 +18,14 @@
 
 /*----------------------------------------------------------------------------
   User Stack & Heap boundary definition
-*----------------------------------------------------------------------------*/
+ *----------------------------------------------------------------------------*/
 #define __STACK_TOP     (__RAM_BASE + __RAM_SIZE)    /* starts at end of RAM */
 #define __HEAP_BASE     (AlignExpr(+0, 8))           /* starts after RW_RAM section, 8 byte aligned */
 #define __APP_HEAP_BASE (AlignExpr(+0, 8))           /* starts after HEAP, 8 byte aligned */
 
 /*----------------------------------------------------------------------------
   Scatter File Definitions definition
-*----------------------------------------------------------------------------*/
+ *----------------------------------------------------------------------------*/
 
 #define __RW_BASE       __RAM_BASE
 #define __RW_SIZE      (__RAM_SIZE - __STACK_SIZE - __HEAP_SIZE - __APP_HEAP_SIZE)
@@ -65,14 +65,14 @@ LR_ROM __ROM_BASE NOCOMPRESS __ROM_SIZE  {    ; load region size_region
   }
 
 /*--------------------------------------------------------------------------*/
-  /* DTCM – SMALL, EXPLICIT, SAFE */
+  /* DTCM - SMALL, EXPLICIT, SAFE */
   /*--------------------------------------------------------------------------*/
   RW_RAM __RW_BASE __RW_SIZE
   {
     /* Explicit DTCM placement only */
     * (.*dtcm*)
 
-  } 
+  }
 
   NS_REGION_0  (AlignExpr(+0, TGU_BLOCK_SIZE)) { ; Non secure region 0
     * (eth_buf)
@@ -99,7 +99,7 @@ LR_ROM __ROM_BASE NOCOMPRESS __ROM_SIZE  {    ; load region size_region
 #if (SRAM0_SRAM1_COMBINED == 1)
 
   /*--------------------------------------------------------------------------*/
-  /* Combined SRAM – ALL LARGE & GENERAL DATA */
+  /* Combined SRAM - ALL LARGE & GENERAL DATA */
   /*--------------------------------------------------------------------------*/
   RW_SRAM APP_SRAM_BASE APP_SRAM_SIZE
   {
