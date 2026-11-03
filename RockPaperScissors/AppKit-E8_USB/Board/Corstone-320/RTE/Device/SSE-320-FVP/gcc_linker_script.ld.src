@@ -239,14 +239,6 @@ SECTIONS
   } > RAM1 AT > ROM1
 */
 
-  /* Non-initialized buffers in fast access RAM */
-  .cache (NOLOAD):
-  {
-    . = ALIGN(32);
-    *(ethos_arena)  /* Ethos-U writable area */
-    *(*bss.pp_buf)
-  } > RAM1
-
   .bss :
   {
     . = ALIGN(4);
@@ -322,6 +314,13 @@ SECTIONS
   /* Check if data + heap + stack exceeds RAM limit */
   ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")
 
+  /* Non-initialized buffers in fast access RAM */
+  .cache (NOLOAD):
+  {
+    . = ALIGN(32);
+    *(ethos_arena)  /* Ethos-U writable area */
+    *(*bss.pp_buf)
+  } > RAM1
   /* Initialized buffers in fast access RAM */
   /* Entry must exist in .copy.table        */
   .init_buf :

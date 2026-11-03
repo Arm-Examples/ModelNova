@@ -265,14 +265,6 @@ SECTIONS
     } >RAM0 AT>RAM0 :ram
     */
 
-    /* Ethos-U writable area */
-#if __RAM1_SIZE > 0
-    .ethos_arena (NOLOAD) : ALIGN(32) {
-        *(ethos_arena)
-        *(*bss.pp_buf)
-    } >RAM1 AT>RAM1 :ethos_ram
-#endif
-
     .bss (NOLOAD) : {
         *(.sbss*)
         *(.gnu.linkonce.sb.*)
@@ -331,6 +323,13 @@ SECTIONS
     } >RAM0 :ram
 #endif
 
+    /* Ethos-U writable area */
+#if __RAM1_SIZE > 0
+    .ethos_arena (NOLOAD) : ALIGN(32) {
+        *(ethos_arena)
+        *(*bss.pp_buf)
+    } >RAM1 AT>RAM1 :ethos_ram
+#endif
     /* Ethos-U model, command stream and constants */
 #if __ROM2_SIZE > 0
     .ethos_model : ALIGN(32) {
