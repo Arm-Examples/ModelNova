@@ -41,7 +41,7 @@ jobs:
 
   CI:
     if: ${{ github.repository == 'Arm-Examples/ModelNova' }}
-    runs-on: [self-hosted, rsp-p5-01]
+    runs-on: [rsp-p5-01]
 
     steps:
       - name: Checkout repository
